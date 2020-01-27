@@ -11,7 +11,7 @@ import Foundation
 final class DataFetcher<T: Decodable> {
     
     func fetchData(complition: @escaping (T?) -> ()) {
-        APIService.shared.getData { [unowned self] (data, error) in
+        APIService.shared.getData { (data, error) in
             if let error = error {
                 print(error)
             }

@@ -23,7 +23,7 @@ struct ItemsData: Decodable {
     let comments: countOfItems?
     let likes: countOfItems?
     let reposts: countOfItems?
-    //let views: countOfItems?
+    let views: countOfItems?
     
 }
 
