@@ -29,6 +29,7 @@ final class APIService {
             URLQueryItem(name: key, value: value)
         })
         guard let url = components.url else { return nil }
+        print(url)
         return url
     }
     

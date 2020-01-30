@@ -32,7 +32,23 @@ enum NewsFeed {
                 let commentsCount: String
                 let repostCount: String
                 let viewsCount: String
+                let profileImageURL: String
+                var photo: Attachment?
+                var sizes: Sizes
             }
+            struct Attachment {
+                let photoURL: String?
+                let width: Int
+                let height: Int
+            }
+            
+            struct Sizes {
+                let postPhotoFrame: CGRect
+                let postTexFrame: CGRect
+                let bottonViewSize: CGRect
+                let totalHeight: CGFloat
+            }
+            
             var news: [Cell]
         }
     }

@@ -19,24 +19,62 @@ protocol NewsFeedPresentationLogic {
 class NewsFeedPresenter: NewsFeedPresentationLogic {
     
     weak var viewController: NewsFeedDisplayLogic?
+    private var sizesManager = SizesManager(viewWidth: UIScreen.main.bounds.width)
+    
+    let dateFormatter: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale(identifier: "ru_RU")
+        dateFormatter.dateFormat = "MMM d, h:mm"
+        return dateFormatter
+    }()
     
     func presentNews(response: NewsFeed.ShowNews.Response) {
+        let groups = response.newsFeedResponse.response.groups
+        let profiles = response.newsFeedResponse.response.profiles
         let cells = response.newsFeedResponse.response.items.map { (feedItem) in
-            getNewsFeedViewModel(from: feedItem)
+            getNewsFeedViewModel(from: feedItem, profiles: profiles, groups: groups)
         }
         let newsFeedViewModel = NewsFeed.ShowNews.ViewModel(news: cells)
         viewController?.displayNews(viewModel: newsFeedViewModel)
     }
     
-    private func getNewsFeedViewModel(from item: ItemsData) -> NewsFeed.ShowNews.ViewModel.Cell {
-        let cell = NewsFeed.ShowNews.ViewModel.Cell(name: "",
-                                                  date: "",
+    private func getNewsFeedViewModel(from item: ItemsData, profiles: [Profiles], groups: [Group]) -> NewsFeed.ShowNews.ViewModel.Cell {
+        let profile = getProfile(sourceId: item.sourceId, profiles: profiles, groups: groups)
+        let date = Date(timeIntervalSince1970: item.date)
+        let dateString = dateFormatter.string(from: date)
+        let cell = NewsFeed.ShowNews.ViewModel.Cell(name: profile.name,
+                                                  date: dateString,
                                                   postText: item.text ?? "" ,
                                                   likesCount: String(item.likes?.count ?? 0),
                                                   commentsCount: String(item.comments?.count ?? 0),
                                                   repostCount: String(item.reposts?.count ?? 0),
-                                                  viewsCount: String(item.views?.count ?? 0)
+                                                  viewsCount: String(item.views?.count ?? 0),
+                                                  profileImageURL: profile.photo100,
+                                                  photo: getPhotoURL(from: item),
+                                                  sizes: sizesManager.getSizes(text: item.text, attacments: item.attachments?.first)
                                                   )
         return cell
     }
+    
+    private func getProfile(sourceId: Int, profiles: [Profiles], groups: [Group] ) -> profileInfo {
+        if sourceId < 0 {
+            let group = groups.first { (group) in
+                group.id == -sourceId
+            }
+            return group!
+        } else {
+            let profile = profiles.first { (profile) in
+                profile.id == sourceId
+            }
+            return profile!
+        }
+    }
+    
+    private func getPhotoURL(from item: ItemsData) -> NewsFeed.ShowNews.ViewModel.Attachment? {
+        guard let photos = item.attachments?.compactMap({ (attachment) in
+            attachment.photo
+        }), let photo = photos.first else { return nil }
+        return NewsFeed.ShowNews.ViewModel.Attachment(photoURL: photo.photoURL, width: photo.photoWidth, height: photo.photoHeight)
+    }
+    
 }
