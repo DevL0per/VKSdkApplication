@@ -10,8 +10,12 @@ import UIKit
 
 class NewsFeedImageView: UIImageView {
     
-    func setImage(with url: String) {
-        guard let url = URL(string: url) else { return }
+    func setImage(with url: String?) {
+        guard let urlString = url, let url = URL(string: urlString) else {
+            self.image = nil
+            self.isHidden = true
+            return
+        }
         if let imageResponse = URLCache.shared.cachedResponse(for: URLRequest(url: url)) {
             self.image = UIImage(data: imageResponse.data)
             print("cached")

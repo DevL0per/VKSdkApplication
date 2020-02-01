@@ -51,6 +51,11 @@ class NewsFeedTableViewCell: UITableViewCell {
     private var viewsImage = UIImageView()
     private var numberOfViewsLabel = UILabel()
     
+    override func prepareForReuse() {
+        topViewImage.setImage(with: nil)
+        centerImageView.setImage(with: nil)
+    }
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
@@ -65,7 +70,6 @@ class NewsFeedTableViewCell: UITableViewCell {
         cellViewModel = post
         topViewNameLabel.text = post.name
         topViewDateLabel.text = post.date
-        topViewImage.setImage(with: post.profileImageURL)
         centerTextLabel.text = post.postText
         numberOfLikesLabel.text = post.likesCount
         numberOfCommentsLabel.text = post.likesCount
@@ -80,12 +84,11 @@ class NewsFeedTableViewCell: UITableViewCell {
         topViewImage.layer.cornerRadius = 25
         topViewImage.clipsToBounds = true
         
-        if let imageURL = post.photo?.photoURL {
-            centerImageView.setImage(with: imageURL)
-            centerImageView.isHidden = false
-        } else {
-            centerImageView.isHidden = true
-        }
+        topViewImage.isHidden = false
+        topViewImage.setImage(with: post.profileImageURL)
+        
+        centerImageView.isHidden = false
+        centerImageView.setImage(with: post.photo?.photoURL)
     }
     
     func showFullPostText(sizes: NewsFeed.ShowNews.ViewModel.Sizes) {
