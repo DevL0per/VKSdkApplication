@@ -8,11 +8,26 @@
 
 import UIKit
 
+protocol NewsFeedTableViewCellDelegate {
+    func fullTextRequest(postId: Int)
+}
+
 class NewsFeedTableViewCell: UITableViewCell {
     
-    private var sizes: NewsFeed.ShowNews.ViewModel.Sizes!
+    var delegate: NewsFeedTableViewCellDelegate!
+    
+    private var cellViewModel: NewsFeed.ShowNews.ViewModel.Cell!
     
     private var backgroundLayer = UIView()
+    private var textHideLineButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("Показать полностью...", for: .normal)
+        button.setTitleColor(#colorLiteral(red: 0.3778024451, green: 0.7568627596, blue: 0.9686274529, alpha: 1), for: .normal)
+        button.contentVerticalAlignment = .center
+        button.contentHorizontalAlignment = .left
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 15)
+        return button
+    }()
     
     private var topContectView = UIView()
     private var topViewImage = NewsFeedImageView()
@@ -39,6 +54,7 @@ class NewsFeedTableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
+        textHideLineButton.addTarget(self, action: #selector(textHideLineButtonWasPressed), for: .touchUpInside)
     }
     
     required init?(coder: NSCoder) {
@@ -46,6 +62,7 @@ class NewsFeedTableViewCell: UITableViewCell {
     }
     
     func setupElements(with post: NewsFeed.ShowNews.ViewModel.Cell) {
+        cellViewModel = post
         topViewNameLabel.text = post.name
         topViewDateLabel.text = post.date
         topViewImage.setImage(with: post.profileImageURL)
@@ -54,11 +71,11 @@ class NewsFeedTableViewCell: UITableViewCell {
         numberOfCommentsLabel.text = post.likesCount
         numberOfRepostLabel.text = post.repostCount
         numberOfViewsLabel.text = post.viewsCount
-        self.sizes = post.sizes
         
-        centerTextLabel.frame = sizes.postTexFrame
-        centerImageView.frame = sizes.postPhotoFrame
-        bottonContentView.frame = sizes.bottonViewSize
+        centerTextLabel.frame = cellViewModel.sizes.postTexFrame
+        centerImageView.frame = cellViewModel.sizes.postPhotoFrame
+        bottonContentView.frame = cellViewModel.sizes.bottonViewSize
+        textHideLineButton.frame = cellViewModel.sizes.textHideLine
         
         topViewImage.layer.cornerRadius = 25
         topViewImage.clipsToBounds = true
@@ -69,6 +86,17 @@ class NewsFeedTableViewCell: UITableViewCell {
         } else {
             centerImageView.isHidden = true
         }
+    }
+    
+    func showFullPostText(sizes: NewsFeed.ShowNews.ViewModel.Sizes) {
+        centerTextLabel.frame = sizes.postTexFrame
+        centerImageView.frame = sizes.postPhotoFrame
+        bottonContentView.frame = sizes.bottonViewSize
+        textHideLineButton.frame = sizes.textHideLine
+    }
+    
+    @objc private func textHideLineButtonWasPressed() {
+        delegate.fullTextRequest(postId: cellViewModel.postId)
     }
     
     private func setupUI() {
@@ -85,7 +113,9 @@ class NewsFeedTableViewCell: UITableViewCell {
         backgroundLayer.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -8).isActive = true
         backgroundLayer.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -8).isActive = true
         
-        addSubview(topContectView)
+        backgroundLayer.addSubview(textHideLineButton)
+        
+        backgroundLayer.addSubview(topContectView)
         topContectView.translatesAutoresizingMaskIntoConstraints = false
         topContectView.topAnchor.constraint(equalTo: backgroundLayer.topAnchor).isActive = true
         topContectView.leftAnchor.constraint(equalTo: backgroundLayer.leftAnchor).isActive = true

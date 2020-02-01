@@ -24,7 +24,6 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
     var newsTableView: UITableView!
     var newsFeedViewModel: NewsFeed.ShowNews.ViewModel?
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
@@ -81,8 +80,22 @@ extension NewsFeedViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "newsCell", for: indexPath) as! NewsFeedTableViewCell
+        cell.delegate = self
         guard let viewModel = newsFeedViewModel?.news[indexPath.row] else { return UITableViewCell() }
         cell.setupElements(with: viewModel)
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        return newsFeedViewModel?.news[indexPath.row].sizes.totalHeight ?? 0
+    }
+    
+}
+
+extension NewsFeedViewController: NewsFeedTableViewCellDelegate {
+    
+    func fullTextRequest(postId: Int) {
+        interactor?.showFullText(request: NewsFeed.ShowFullPostText.Request(postId: postId,
+                                                                            newsFeedViewModel: newsFeedViewModel!))
     }
 }

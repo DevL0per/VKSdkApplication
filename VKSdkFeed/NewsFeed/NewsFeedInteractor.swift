@@ -14,6 +14,7 @@ import UIKit
 
 protocol NewsFeedBusinessLogic {
     func getNews(request: NewsFeed.ShowNews.Request)
+    func showFullText(request: NewsFeed.ShowFullPostText.Request)
 }
 
 protocol NewsFeedDataStore {
@@ -32,5 +33,10 @@ class NewsFeedInteractor: NewsFeedBusinessLogic, NewsFeedDataStore {
             guard let response = response else { return }
             self.presenter?.presentNews(response: NewsFeed.ShowNews.Response(newsFeedResponse: response))
         }
+    }
+    
+    func showFullText(request: NewsFeed.ShowFullPostText.Request) {
+        presenter?.showFullText(response: NewsFeed.ShowFullPostText.Response(postId: request.postId,
+                                                                             newsFeedViewModel: request.newsFeedViewModel))
     }
 }

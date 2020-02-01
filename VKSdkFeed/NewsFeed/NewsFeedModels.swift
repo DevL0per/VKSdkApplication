@@ -28,6 +28,7 @@ enum NewsFeed {
                 let name: String
                 let date: String
                 let postText: String
+                let postId: Int
                 let likesCount: String
                 let commentsCount: String
                 let repostCount: String
@@ -47,9 +48,27 @@ enum NewsFeed {
                 let postTexFrame: CGRect
                 let bottonViewSize: CGRect
                 let totalHeight: CGFloat
+                let textHideLine: CGRect
             }
             
             var news: [Cell]
         }
+    }
+    
+    enum ShowFullPostText {
+        struct Request {
+            let postId: Int
+            var newsFeedViewModel: NewsFeed.ShowNews.ViewModel
+        }
+        
+        struct Response {
+            let postId: Int
+            var newsFeedViewModel: NewsFeed.ShowNews.ViewModel
+        }
+        
+        struct ViewModel {
+            var newsFeedViewModel: NewsFeed.ShowNews.ViewModel
+        }
+        
     }
 }
