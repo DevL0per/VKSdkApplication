@@ -10,8 +10,11 @@ import Foundation
 
 final class DataFetcher<T: Decodable> {
     
-    func fetchData(complition: @escaping (T?) -> ()) {
-        let dictionary = ["filters": "post,photo"]
+    func fetchData(startTime: String?, complition: @escaping (T?) -> ()) {
+        var dictionary = ["filters": "post,photo"]
+        if let startTime = startTime {
+            dictionary["start_time"] = startTime
+        }
         let apiService = APIService(dictionary: dictionary, path: URLStructure.path)
         apiService.getData() { (data, error) in
             if let error = error {

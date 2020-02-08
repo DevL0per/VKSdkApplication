@@ -16,6 +16,7 @@ protocol NewsFeedPresentationLogic {
     func presentNews(response: NewsFeed.ShowNews.Response)
     func showFullText(response: NewsFeed.ShowFullPostText.Response)
     func presentUserInfo(response: NewsFeed.ShowUserInfo.Response)
+    func presentPreviousNews(response: NewsFeed.ShowPreviousNews.Response)
 }
 
 class NewsFeedPresenter: NewsFeedPresentationLogic {
@@ -42,11 +43,26 @@ class NewsFeedPresenter: NewsFeedPresentationLogic {
         viewController?.displayNews(viewModel: newsFeedViewModel)
     }
     
+    func presentPreviousNews(response: NewsFeed.ShowPreviousNews.Response) {
+        let viewModel = response.newsFeedViewModel
+        
+    }
+    
     func presentUserInfo(response: NewsFeed.ShowUserInfo.Response) {
         let userInfo = response.userInfoResponse.response.first!
         let fullName = (userInfo.firstName) + " " + (userInfo.lastName)
         let viewModel = NewsFeed.ShowUserInfo.ViewModel(fullName: fullName, imageURL: userInfo.photo100)
         viewController?.displayUserInfo(viewModel: viewModel)
+    }
+    
+    private func getCells(from response: NewsFeedResponse) -> ItemsData {
+        let groups = response.response.groups
+        let profiles = response.response.profiles
+        items = response.response.items
+        let cells = response.response.items.map { (feedItem) in
+            getNewsFeedViewModel(from: feedItem, profiles: profiles, groups: groups)
+        }
+        return cells
     }
     
     private func getNewsFeedViewModel(from item: ItemsData, profiles: [Profiles], groups: [Group]) -> NewsFeed.ShowNews.ViewModel.Cell {
@@ -57,10 +73,10 @@ class NewsFeedPresenter: NewsFeedPresentationLogic {
                                                   date: dateString,
                                                   postText: item.text ?? "",
                                                   postId: item.postId ,
-                                                  likesCount: String(item.likes?.count ?? 0),
-                                                  commentsCount: String(item.comments?.count ?? 0),
-                                                  repostCount: String(item.reposts?.count ?? 0),
-                                                  viewsCount: String(item.views?.count ?? 0),
+                                                  likesCount: formatNumber(number: item.likes?.count),
+                                                  commentsCount: formatNumber(number: item.comments?.count),
+                                                  repostCount: formatNumber(number: item.reposts?.count),
+                                                  viewsCount: formatNumber(number: item.views?.count),
                                                   profileImageURL: profile.photo100,
                                                   photo: getPhotos(from: item),
                                                   sizes: sizesManager.getSizes(text: item.text, attacments: getPhotos(from: item), fullTextWillShow: false)
@@ -80,6 +96,19 @@ class NewsFeedPresenter: NewsFeedPresentationLogic {
             }
             return profile!
         }
+    }
+    
+    private func formatNumber(number: Int?) -> String {
+        guard let number = number else { return "0" }
+        var stringNumber = String(number)
+        if stringNumber.count == 4 || stringNumber.count == 5 {
+            stringNumber = String(stringNumber.dropLast(3))
+            stringNumber+="k"
+        } else if stringNumber.count >= 6 {
+            stringNumber = String(stringNumber.dropLast(5))
+            stringNumber+="m"
+        }
+        return stringNumber
     }
     
     private func getPhotos(from item: ItemsData) -> [NewsFeed.ShowNews.ViewModel.Attachment]? {

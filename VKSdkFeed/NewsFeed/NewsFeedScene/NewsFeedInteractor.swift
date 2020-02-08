@@ -16,6 +16,7 @@ protocol NewsFeedBusinessLogic {
     func getNews(request: NewsFeed.ShowNews.Request)
     func getUserInfo(request: NewsFeed.ShowUserInfo.Request)
     func showFullText(request: NewsFeed.ShowFullPostText.Request)
+    func showPreviousNews(requset: NewsFeed.ShowPreviousNews.Request)
 }
 
 protocol NewsFeedDataStore {
@@ -25,18 +26,20 @@ class NewsFeedInteractor: NewsFeedBusinessLogic, NewsFeedDataStore {
     
     var presenter: NewsFeedPresentationLogic?
     var worker: NewsFeedWorker?
+    var startTime: String?
+    let datafetcher = DataFetcher<NewsFeedResponse>()
     
     func getNews(request: NewsFeed.ShowNews.Request) {
-        let datafetcher = DataFetcher<NewsFeedResponse>()
-        datafetcher.fetchData { [unowned self] (response) in
+        datafetcher.fetchData(startTime: startTime) { [unowned self] (response) in
             guard let response = response else { return }
+            self.startTime = response.response.startFrom
             self.presenter?.presentNews(response: NewsFeed.ShowNews.Response(newsFeedResponse: response))
         }
     }
     
     func getUserInfo(request: NewsFeed.ShowUserInfo.Request) {
-        let datafetcher = DataFetcher<UserInfoResponse>()
-        datafetcher.fetchUserData { (userInfoResponse) in
+        let userDatafetcher = DataFetcher<UserInfoResponse>()
+        userDatafetcher.fetchUserData { (userInfoResponse) in
             guard let response = userInfoResponse else { return }
             self.presenter?.presentUserInfo(response: NewsFeed.ShowUserInfo.Response(userInfoResponse: response))
         }
@@ -45,5 +48,13 @@ class NewsFeedInteractor: NewsFeedBusinessLogic, NewsFeedDataStore {
     func showFullText(request: NewsFeed.ShowFullPostText.Request) {
         presenter?.showFullText(response: NewsFeed.ShowFullPostText.Response(postId: request.postId,
                                                                              newsFeedViewModel: request.newsFeedViewModel))
+    }
+    
+    func showPreviousNews(requset: NewsFeed.ShowPreviousNews.Request) {
+        datafetcher.fetchData(startTime: startTime) { [unowned self] (response) in
+            guard let response = response else { return }
+            self.startTime = response.response.startFrom
+            self.presenter?.presentNews(response: NewsFeed.ShowNews.Response(newsFeedResponse: response))
+        }
     }
 }

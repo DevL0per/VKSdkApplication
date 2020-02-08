@@ -174,6 +174,7 @@
 				F6E7F14623DE429300E31E9A /* NewsFeedCell */,
 				F6EB272523E5D31400D65985 /* CollectionView */,
 				F6D89BBC23DDF0E000619EA7 /* Authentication */,
+				F6E7F12923DE0E1200E31E9A /* Models */,
 				F6D89BB923DB995C00619EA7 /* Serveces */,
 				F67B4AB723EEEBB3002222CD /* Tools */,
 				F6D89BAF23DB660400619EA7 /* Info.plist */,
@@ -184,7 +185,6 @@
 		F6D89BB923DB995C00619EA7 /* Serveces */ = {
 			isa = PBXGroup;
 			children = (
-				F6E7F12923DE0E1200E31E9A /* Models */,
 				F6D89BCC23DDFE1E00619EA7 /* APIService */,
 				F67B4AB623EEEBA5002222CD /* Helpers */,
 			);

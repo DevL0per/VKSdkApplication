@@ -116,8 +116,7 @@ class NewsFeedTableViewCell: UITableViewCell {
     private func setupUI() {
         
         backgroundLayer.addSubview(photosCollectionView)
-        self.backgroundColor = #colorLiteral(red: 0.1764705926, green: 0.4980392158, blue: 0.7568627596, alpha: 1)
-        
+        backgroundColor = #colorLiteral(red: 0.1764705926, green: 0.4980392158, blue: 0.7568627596, alpha: 1)
         addSubview(backgroundLayer)
         backgroundLayer.layer.cornerRadius = 10
         backgroundLayer.clipsToBounds = true
@@ -169,7 +168,7 @@ class NewsFeedTableViewCell: UITableViewCell {
         addSubview(centerImageView)
         centerImageView.backgroundColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
         
-        addSubview(bottonContentView)
+        backgroundLayer.addSubview(bottonContentView)
         
         bottonContentView.addSubview(likesImage)
         likesImage.image = UIImage(named: "like")
@@ -200,7 +199,7 @@ class NewsFeedTableViewCell: UITableViewCell {
         numberOfCommentsLabel.textColor = #colorLiteral(red: 0.5058823529, green: 0.5490196078, blue: 0.6, alpha: 1)
         numberOfCommentsLabel.translatesAutoresizingMaskIntoConstraints = false
         numberOfCommentsLabel.topAnchor.constraint(equalTo: bottonContentView.topAnchor, constant: 0).isActive = true
-        numberOfCommentsLabel.leftAnchor.constraint(equalTo: commentsImage.rightAnchor, constant: 10).isActive = true
+        numberOfCommentsLabel.leftAnchor.constraint(equalTo: commentsImage.rightAnchor, constant: 5).isActive = true
         numberOfCommentsLabel.widthAnchor.constraint(equalToConstant: 40).isActive = true
         
         bottonContentView.addSubview(repostImage)
@@ -216,21 +215,21 @@ class NewsFeedTableViewCell: UITableViewCell {
         numberOfRepostLabel.textColor = #colorLiteral(red: 0.5058823529, green: 0.5490196078, blue: 0.6, alpha: 1)
         numberOfRepostLabel.translatesAutoresizingMaskIntoConstraints = false
         numberOfRepostLabel.topAnchor.constraint(equalTo: bottonContentView.topAnchor, constant: 0).isActive = true
-        numberOfRepostLabel.leftAnchor.constraint(equalTo: repostImage.rightAnchor, constant: 10).isActive = true
+        numberOfRepostLabel.leftAnchor.constraint(equalTo: repostImage.rightAnchor, constant: 5).isActive = true
         numberOfRepostLabel.widthAnchor.constraint(equalToConstant: 40).isActive = true
         
         bottonContentView.addSubview(numberOfViewsLabel)
+        numberOfViewsLabel.textAlignment = .right
         numberOfViewsLabel.font = numberOfViewsLabel.font.withSize(14)
         numberOfViewsLabel.textColor = #colorLiteral(red: 0.5058823529, green: 0.5490196078, blue: 0.6, alpha: 1)
         numberOfViewsLabel.translatesAutoresizingMaskIntoConstraints = false
         numberOfViewsLabel.topAnchor.constraint(equalTo: bottonContentView.topAnchor, constant: 0).isActive = true
-        numberOfViewsLabel.rightAnchor.constraint(equalTo: bottonContentView.rightAnchor, constant: -20).isActive = true
-        numberOfViewsLabel.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        numberOfViewsLabel.rightAnchor.constraint(equalTo: bottonContentView.rightAnchor, constant: -10).isActive = true
         
         bottonContentView.addSubview(viewsImage)
         viewsImage.image = UIImage(named: "view")
         viewsImage.translatesAutoresizingMaskIntoConstraints = false
-        viewsImage.rightAnchor.constraint(equalTo: numberOfViewsLabel.leftAnchor, constant: -10).isActive = true
+        viewsImage.rightAnchor.constraint(equalTo: numberOfViewsLabel.leftAnchor, constant: -5).isActive = true
         viewsImage.topAnchor.constraint(equalTo: bottonContentView.topAnchor, constant: 0).isActive = true
         viewsImage.heightAnchor.constraint(equalToConstant: 20).isActive = true
         viewsImage.widthAnchor.constraint(equalToConstant: 20).isActive = true

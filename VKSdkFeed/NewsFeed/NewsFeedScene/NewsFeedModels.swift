@@ -55,6 +55,22 @@ enum NewsFeed {
         }
     }
     
+    enum ShowPreviousNews {
+        struct Request {
+            var newsFeedViewModel: NewsFeed.ShowNews.ViewModel
+        }
+        
+        struct Response {
+            var newsFeedViewModel: NewsFeed.ShowNews.ViewModel
+            let newsFeedResponse: NewsFeedResponse
+        }
+        
+        struct ViewModel {
+            var newsFeedViewModel: NewsFeed.ShowNews.ViewModel
+        }
+        
+    }
+    
     enum ShowFullPostText {
         struct Request {
             let postId: Int

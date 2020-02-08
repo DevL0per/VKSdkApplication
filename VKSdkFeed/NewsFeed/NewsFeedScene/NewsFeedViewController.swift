@@ -24,6 +24,7 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
     
     var newsTableView: UITableView!
     var newsFeedViewModel: NewsFeed.ShowNews.ViewModel?
+    var refreshControl: UIRefreshControl!
     
     let titleView = NavigationControllerView()
     
@@ -32,6 +33,7 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
         setup()
         setupNewsTableView()
         setupNavigationBar()
+        setupRefreshControl()
         interactor?.getNews(request: NewsFeed.ShowNews.Request())
         interactor?.getUserInfo(request: NewsFeed.ShowUserInfo.Request())
     }
@@ -44,16 +46,24 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
         newsTableView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         newsTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         newsTableView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
-        
+        newsTableView.contentInset.top = 10
+        newsTableView.backgroundColor = #colorLiteral(red: 0.1764705926, green: 0.4980392158, blue: 0.7568627596, alpha: 1)
         newsTableView.delegate = self
         newsTableView.dataSource = self
         newsTableView.register(NewsFeedTableViewCell.self, forCellReuseIdentifier: "newsCell")
+    }
+    
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if scrollView.contentOffset.y == scrollView.bounds.height/2 {
+            
+        }
     }
     
     func displayNews(viewModel: NewsFeed.ShowNews.ViewModel) {
         DispatchQueue.main.async { [unowned self] in
             self.newsFeedViewModel = viewModel
             self.newsTableView.reloadData()
+            self.refreshControl.endRefreshing()
         }
     }
     
@@ -66,6 +76,16 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
     private func setupNavigationBar() {
         navigationController?.hidesBarsOnSwipe = true
         navigationItem.titleView = titleView
+    }
+    
+    private func setupRefreshControl() {
+        refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refreshNews), for: .valueChanged)
+        newsTableView.refreshControl = refreshControl
+    }
+    
+    @objc func refreshNews() {
+        interactor?.getNews(request: NewsFeed.ShowNews.Request())
     }
     
     // MARK: Setup
