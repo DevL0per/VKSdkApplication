@@ -60,7 +60,6 @@ struct Photo: Decodable {
         }
     }
     
-    
 }
 
 struct PhotoSize: Decodable {
@@ -101,3 +100,4 @@ struct Group: Decodable, profileInfo {
     let name: String
     let photo100: String
 }
+

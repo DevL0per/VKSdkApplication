@@ -12,5 +12,6 @@ struct URLStructure {
     static let scheme = "https"
     static let host = "api.vk.com"
     static let path = "/method/newsfeed.get"
+    static let userPath = "/method/users.get"
     static let version = "5.103"
 }

@@ -34,7 +34,7 @@ enum NewsFeed {
                 let repostCount: String
                 let viewsCount: String
                 let profileImageURL: String
-                var photo: Attachment?
+                var photo: [Attachment]?
                 var sizes: Sizes
             }
             struct Attachment {
@@ -70,5 +70,19 @@ enum NewsFeed {
             var newsFeedViewModel: NewsFeed.ShowNews.ViewModel
         }
         
+    }
+    
+    enum ShowUserInfo {
+        struct Request {
+        }
+        
+        struct Response {
+            var userInfoResponse: UserInfoResponse
+        }
+        
+        struct ViewModel {
+            let fullName: String
+            let imageURL: String
+        }
     }
 }

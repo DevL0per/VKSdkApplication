@@ -51,6 +51,7 @@ extension AppDelegate: AuthDelegate {
     func sholdPresentNewsFeed() {
         let newsFeedVC: NewsFeedViewController = NewsFeedViewController.loadVC()!
         let navigationController = UINavigationController(rootViewController: newsFeedVC)
+        navigationController.modalPresentationStyle = .fullScreen
         window?.rootViewController?.present(navigationController, animated: true, completion: nil)
     }
 }

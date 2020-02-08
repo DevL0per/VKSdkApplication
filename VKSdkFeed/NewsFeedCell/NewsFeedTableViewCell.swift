@@ -29,6 +29,7 @@ class NewsFeedTableViewCell: UITableViewCell {
         return button
     }()
     
+    private var photosCollectionView = PhotosCollectionViewController()
     private var topContectView = UIView()
     private var topViewImage = NewsFeedImageView()
     private var topViewNameLabel =  UILabel()
@@ -77,18 +78,28 @@ class NewsFeedTableViewCell: UITableViewCell {
         numberOfViewsLabel.text = post.viewsCount
         
         centerTextLabel.frame = cellViewModel.sizes.postTexFrame
-        centerImageView.frame = cellViewModel.sizes.postPhotoFrame
         bottonContentView.frame = cellViewModel.sizes.bottonViewSize
         textHideLineButton.frame = cellViewModel.sizes.textHideLine
         
         topViewImage.layer.cornerRadius = 25
         topViewImage.clipsToBounds = true
-        
-        topViewImage.isHidden = false
         topViewImage.setImage(with: post.profileImageURL)
         
-        centerImageView.isHidden = false
-        centerImageView.setImage(with: post.photo?.photoURL)
+        centerImageView.isHidden = true
+        photosCollectionView.isHidden = true
+        
+        if let photos = post.photo, let photo = photos.first {
+            if photos.count > 1 {
+                photosCollectionView.frame = cellViewModel.sizes.postPhotoFrame
+                photosCollectionView.isHidden = false
+                photosCollectionView.setPhotos(photos: photos)
+                photosCollectionView.backgroundColor = .clear
+            } else if photos.count == 1 {
+                centerImageView.isHidden = false
+                centerImageView.frame = cellViewModel.sizes.postPhotoFrame
+                centerImageView.setImage(with: photo.photoURL)
+            }
+        }
     }
     
     func showFullPostText(sizes: NewsFeed.ShowNews.ViewModel.Sizes) {
@@ -104,6 +115,7 @@ class NewsFeedTableViewCell: UITableViewCell {
     
     private func setupUI() {
         
+        backgroundLayer.addSubview(photosCollectionView)
         self.backgroundColor = #colorLiteral(red: 0.1764705926, green: 0.4980392158, blue: 0.7568627596, alpha: 1)
         
         addSubview(backgroundLayer)
@@ -126,7 +138,6 @@ class NewsFeedTableViewCell: UITableViewCell {
         topContectView.heightAnchor.constraint(equalToConstant: 60).isActive = true
         
         topContectView.addSubview(topViewImage)
-        topViewImage.backgroundColor = #colorLiteral(red: 0.9254902005, green: 0.2352941185, blue: 0.1019607857, alpha: 1)
         topViewImage.translatesAutoresizingMaskIntoConstraints = false
         topViewImage.topAnchor.constraint(equalTo: topContectView.topAnchor, constant: 20).isActive = true
         topViewImage.leftAnchor.constraint(equalTo: topContectView.leftAnchor, constant: 20).isActive = true
@@ -156,6 +167,7 @@ class NewsFeedTableViewCell: UITableViewCell {
         centerTextLabel.numberOfLines = 0
         
         addSubview(centerImageView)
+        centerImageView.backgroundColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
         
         addSubview(bottonContentView)
         

@@ -15,6 +15,7 @@ import UIKit
 protocol NewsFeedPresentationLogic {
     func presentNews(response: NewsFeed.ShowNews.Response)
     func showFullText(response: NewsFeed.ShowFullPostText.Response)
+    func presentUserInfo(response: NewsFeed.ShowUserInfo.Response)
 }
 
 class NewsFeedPresenter: NewsFeedPresentationLogic {
@@ -41,6 +42,13 @@ class NewsFeedPresenter: NewsFeedPresentationLogic {
         viewController?.displayNews(viewModel: newsFeedViewModel)
     }
     
+    func presentUserInfo(response: NewsFeed.ShowUserInfo.Response) {
+        let userInfo = response.userInfoResponse.response.first!
+        let fullName = (userInfo.firstName) + " " + (userInfo.lastName)
+        let viewModel = NewsFeed.ShowUserInfo.ViewModel(fullName: fullName, imageURL: userInfo.photo100)
+        viewController?.displayUserInfo(viewModel: viewModel)
+    }
+    
     private func getNewsFeedViewModel(from item: ItemsData, profiles: [Profiles], groups: [Group]) -> NewsFeed.ShowNews.ViewModel.Cell {
         let profile = getProfile(sourceId: item.sourceId, profiles: profiles, groups: groups)
         let date = Date(timeIntervalSince1970: item.date)
@@ -54,8 +62,8 @@ class NewsFeedPresenter: NewsFeedPresentationLogic {
                                                   repostCount: String(item.reposts?.count ?? 0),
                                                   viewsCount: String(item.views?.count ?? 0),
                                                   profileImageURL: profile.photo100,
-                                                  photo: getPhotoURL(from: item),
-                                                  sizes: sizesManager.getSizes(text: item.text, attacments: item.attachments?.first, fullTextWillShow: false)
+                                                  photo: getPhotos(from: item),
+                                                  sizes: sizesManager.getSizes(text: item.text, attacments: getPhotos(from: item), fullTextWillShow: false)
                                                   )
         return cell
     }
@@ -74,11 +82,13 @@ class NewsFeedPresenter: NewsFeedPresentationLogic {
         }
     }
     
-    private func getPhotoURL(from item: ItemsData) -> NewsFeed.ShowNews.ViewModel.Attachment? {
-        guard let photos = item.attachments?.compactMap({ (attachment) in
-            attachment.photo
-        }), let photo = photos.first else { return nil }
-        return NewsFeed.ShowNews.ViewModel.Attachment(photoURL: photo.photoURL, width: photo.photoWidth, height: photo.photoHeight)
+    private func getPhotos(from item: ItemsData) -> [NewsFeed.ShowNews.ViewModel.Attachment]? {
+        let attachments = item.attachments?.compactMap({ (attachment) -> NewsFeed.ShowNews.ViewModel.Attachment? in
+            if let photo = attachment.photo {
+                return NewsFeed.ShowNews.ViewModel.Attachment(photoURL: photo.photoURL, width: photo.photoWidth, height: photo.photoHeight)
+            } else { return nil }
+        })
+        return attachments
     }
     
     func showFullText(response: NewsFeed.ShowFullPostText.Response) {
@@ -86,7 +96,7 @@ class NewsFeedPresenter: NewsFeedPresentationLogic {
         for (index, post) in variableResponse.newsFeedViewModel.news.enumerated() {
             if post.postId == response.postId {
                 let item = items?.first(where: {$0.postId == response.postId})
-                let sizes = sizesManager.getSizes(text: item?.text, attacments: item?.attachments?.first, fullTextWillShow: true)
+                let sizes = sizesManager.getSizes(text: item?.text, attacments: getPhotos(from: item!), fullTextWillShow: true)
                 variableResponse.newsFeedViewModel.news[index].sizes = sizes
             }
         }

@@ -11,7 +11,21 @@ import Foundation
 final class DataFetcher<T: Decodable> {
     
     func fetchData(complition: @escaping (T?) -> ()) {
-        APIService.shared.getData { (data, error) in
+        let dictionary = ["filters": "post,photo"]
+        let apiService = APIService(dictionary: dictionary, path: URLStructure.path)
+        apiService.getData() { (data, error) in
+            if let error = error {
+                print(error)
+            }
+            let data = self.decodeJSON(from: data)
+            complition(data)
+        }
+    }
+
+    func fetchUserData(complition: @escaping (T?) -> ()) {
+        let dictionary = ["fields": "photo_100"]
+        let apiService = APIService(dictionary: dictionary, path: URLStructure.userPath)
+        apiService.getData() { (data, error) in
             if let error = error {
                 print(error)
             }

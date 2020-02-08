@@ -11,34 +11,37 @@ import VK_ios_sdk
 
 final class APIService {
     
-    static var shared = APIService()
+    private var dictionary: [String: String]
+    private var path: String
+    
+    init(dictionary: [String: String], path: String) {
+        self.dictionary = dictionary
+        self.path = path
+    }
     
     func getData(complition: @escaping (Data?, Error?)->()) {
-        guard let url = getURL(parameters: createParameters()) else { return }
+        guard let url = getURL() else { return }
         URLSession.shared.dataTask(with: url) { (data, respons, error) in
             complition(data, error)
         }.resume()
     }
     
-    private func getURL(parameters: [String: String]) -> URL? {
+    private func getURL() -> URL? {
         var components = URLComponents()
         components.scheme = URLStructure.scheme
         components.host = URLStructure.host
-        components.path = URLStructure.path
+        components.path = path
         components.queryItems = createParameters().map({ (key: String, value: String) -> URLQueryItem in
             URLQueryItem(name: key, value: value)
         })
         guard let url = components.url else { return nil }
-        print(url)
         return url
     }
     
     private func createParameters() -> [String: String] {
-        var dictionary: [String: String] = [:]
         let token = AppDelegate.shared.token
         dictionary["v"] = URLStructure.version
         dictionary["access_token"] = token
-        dictionary["filters"] = "post,photo"
         return dictionary
     }
 }

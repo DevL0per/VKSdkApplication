@@ -26,7 +26,8 @@ class SizesManager {
         self.viewWidth = viewWidth
     }
     
-    func getSizes(text: String?, attacments: Attachments?, fullTextWillShow: Bool) -> NewsFeed.ShowNews.ViewModel.Sizes {
+    func getSizes(text: String?, attacments: [NewsFeed.ShowNews.ViewModel.Attachment]?,
+                  fullTextWillShow: Bool) -> NewsFeed.ShowNews.ViewModel.Sizes {
     
         var textSize = CGRect.zero
         var textHideButton = CGRect.zero
@@ -51,12 +52,23 @@ class SizesManager {
         
         var attachmentSize = CGRect.zero
         let maxTextY = max(textSize.maxY + 8, textHideButton.maxY + 8)
+        let topPosition = textSize.size == CGSize.zero ? Constants.topViewHeight + 8 : maxTextY
         
-        if let photoAttachmets = attacments?.photo {
-            let topPosition = textSize.size == CGSize.zero ? Constants.topViewHeight + 8 : maxTextY
-            let ratio: CGFloat = CGFloat(photoAttachmets.photoHeight) / CGFloat(photoAttachmets.photoWidth)
-            let photoFrame = CGSize(width: backgroundViewWidth, height: CGFloat(photoAttachmets.photoHeight) * ratio)
-            attachmentSize = CGRect(origin: CGPoint(x: 8, y: topPosition), size: photoFrame)
+        if let photoAttachmets = attacments {
+            if photoAttachmets.count > 1 {
+                let photosSizes = photoAttachmets.map { (attachment) -> CGSize in
+                    return CGSize(width: attachment.width, height: attachment.height)
+                }
+                if let photoHeight = RowLayout.getRowHeight(superViewWidth: backgroundViewWidth, photosSizes: photosSizes) {
+                    let photoFrame = CGSize(width: backgroundViewWidth, height: photoHeight)
+                    attachmentSize = CGRect(origin: CGPoint(x: 8, y: topPosition), size: photoFrame)
+                }
+            } else if photoAttachmets.count == 1 {
+                let ratio: CGFloat = CGFloat(photoAttachmets.first!.width) / CGFloat(photoAttachmets.first!.height)
+                let photoFrame = CGSize(width: backgroundViewWidth, height: CGFloat(photoAttachmets.first!.height) / ratio)
+                attachmentSize = CGRect(origin: CGPoint(x: 8, y: topPosition), size: photoFrame)
+            }
+            
         }
         
         let bottomViewTop = max(attachmentSize.maxY, maxTextY) + 10

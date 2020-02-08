@@ -12,17 +12,14 @@ class NewsFeedImageView: UIImageView {
     
     func setImage(with url: String?) {
         guard let urlString = url, let url = URL(string: urlString) else {
-            self.image = nil
-            self.isHidden = true
+            image = nil
             return
         }
         if let imageResponse = URLCache.shared.cachedResponse(for: URLRequest(url: url)) {
             self.image = UIImage(data: imageResponse.data)
-            print("cached")
             return
         }
         
-        print("internet")
         URLSession.shared.dataTask(with: url) { [weak self] (data, response, error) in
             DispatchQueue.main.async {
                 guard let data = data, let response = response else { return }

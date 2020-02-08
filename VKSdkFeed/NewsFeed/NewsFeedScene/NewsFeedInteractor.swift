@@ -14,6 +14,7 @@ import UIKit
 
 protocol NewsFeedBusinessLogic {
     func getNews(request: NewsFeed.ShowNews.Request)
+    func getUserInfo(request: NewsFeed.ShowUserInfo.Request)
     func showFullText(request: NewsFeed.ShowFullPostText.Request)
 }
 
@@ -26,12 +27,18 @@ class NewsFeedInteractor: NewsFeedBusinessLogic, NewsFeedDataStore {
     var worker: NewsFeedWorker?
     
     func getNews(request: NewsFeed.ShowNews.Request) {
-        worker = NewsFeedWorker()
-        worker?.doSomeWork()
         let datafetcher = DataFetcher<NewsFeedResponse>()
         datafetcher.fetchData { [unowned self] (response) in
             guard let response = response else { return }
             self.presenter?.presentNews(response: NewsFeed.ShowNews.Response(newsFeedResponse: response))
+        }
+    }
+    
+    func getUserInfo(request: NewsFeed.ShowUserInfo.Request) {
+        let datafetcher = DataFetcher<UserInfoResponse>()
+        datafetcher.fetchUserData { (userInfoResponse) in
+            guard let response = userInfoResponse else { return }
+            self.presenter?.presentUserInfo(response: NewsFeed.ShowUserInfo.Response(userInfoResponse: response))
         }
     }
     

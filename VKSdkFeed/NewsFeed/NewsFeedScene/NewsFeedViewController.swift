@@ -14,6 +14,7 @@ import UIKit
 
 protocol NewsFeedDisplayLogic: class {
     func displayNews(viewModel: NewsFeed.ShowNews.ViewModel)
+    func displayUserInfo(viewModel: NewsFeed.ShowUserInfo.ViewModel)
 }
 
 class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
@@ -24,11 +25,15 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
     var newsTableView: UITableView!
     var newsFeedViewModel: NewsFeed.ShowNews.ViewModel?
     
+    let titleView = NavigationControllerView()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
         setupNewsTableView()
+        setupNavigationBar()
         interactor?.getNews(request: NewsFeed.ShowNews.Request())
+        interactor?.getUserInfo(request: NewsFeed.ShowUserInfo.Request())
     }
     
     private func setupNewsTableView() {
@@ -50,6 +55,17 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
             self.newsFeedViewModel = viewModel
             self.newsTableView.reloadData()
         }
+    }
+    
+    func displayUserInfo(viewModel: NewsFeed.ShowUserInfo.ViewModel) {
+        DispatchQueue.main.async { [unowned self] in
+            self.titleView.setImage(imageURL: viewModel.imageURL)
+        }
+    }
+    
+    private func setupNavigationBar() {
+        navigationController?.hidesBarsOnSwipe = true
+        navigationItem.titleView = titleView
     }
     
     // MARK: Setup
