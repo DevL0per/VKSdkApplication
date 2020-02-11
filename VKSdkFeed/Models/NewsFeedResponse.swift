@@ -15,7 +15,7 @@ struct NewsFeedResponse: Decodable {
 struct ItemsDataResponse: Decodable {
     var items: [ItemsData]
     var profiles: [Profiles]
-    var startFrom: String?
+    var nextFrom: String?
     var groups: [Group]
 }
 

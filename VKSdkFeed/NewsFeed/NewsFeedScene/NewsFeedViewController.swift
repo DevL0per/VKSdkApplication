@@ -15,6 +15,7 @@ import UIKit
 protocol NewsFeedDisplayLogic: class {
     func displayNews(viewModel: NewsFeed.ShowNews.ViewModel)
     func displayUserInfo(viewModel: NewsFeed.ShowUserInfo.ViewModel)
+    func displaySearchedGroups(viewModel: NewsFeed.SearchGroup.ViewModel)
 }
 
 class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
@@ -24,6 +25,8 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
     
     var newsTableView: UITableView!
     var newsFeedViewModel: NewsFeed.ShowNews.ViewModel?
+    var newsFeedViewModelSearhResult: NewsFeed.ShowNews.ViewModel?
+    
     var refreshControl: UIRefreshControl!
     
     let titleView = NavigationControllerView()
@@ -54,14 +57,27 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
     }
     
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        if scrollView.contentOffset.y == scrollView.bounds.height/2 {
-            
+        print(scrollView.contentSize.height)
+        if scrollView.contentOffset.y > scrollView.contentSize.height/2 {
+            if newsFeedViewModel != nil {
+                let request = NewsFeed.ShowPreviousNews.Request(newsFeedViewModel: newsFeedViewModel!)
+                interactor?.showPreviousNews(request: request)
+            }
         }
+    }
+
+    func displaySearchedGroups(viewModel: NewsFeed.SearchGroup.ViewModel) {
+        newsFeedViewModelSearhResult = viewModel.resultOfSearching
+        newsTableView.reloadData()
+        newsTableView.layoutIfNeeded()
     }
     
     func displayNews(viewModel: NewsFeed.ShowNews.ViewModel) {
         DispatchQueue.main.async { [unowned self] in
             self.newsFeedViewModel = viewModel
+            if !self.titleView.isSeachTextViewEmpty {
+                self.textFieldWasEdited(text: self.titleView.navigationControllerTextView.text!)
+            }
             self.newsTableView.reloadData()
             self.refreshControl.endRefreshing()
         }
@@ -76,12 +92,16 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
     private func setupNavigationBar() {
         navigationController?.hidesBarsOnSwipe = true
         navigationItem.titleView = titleView
+        titleView.navigationControllerTextView.delegate = self
+        titleView.delegate = self
+        //titleView.navigationControllerTextView.addTarget(NewsFeedViewController.self, action: #selector(textFieldWasEdited), for: .editingChanged)
     }
     
     private func setupRefreshControl() {
         refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refreshNews), for: .valueChanged)
         newsTableView.refreshControl = refreshControl
+        definesPresentationContext = true
     }
     
     @objc func refreshNews() {
@@ -107,18 +127,30 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
 extension NewsFeedViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return newsFeedViewModel?.news.count ?? 0
+        return titleView.isSeachTextViewEmpty ? newsFeedViewModel?.news.count ?? 0
+            : newsFeedViewModelSearhResult?.news.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return newsFeedViewModel?.news[indexPath.row].sizes.totalHeight ?? 0
+        if !titleView.isSeachTextViewEmpty {
+            return newsFeedViewModelSearhResult?.news[indexPath.row].sizes.totalHeight ?? 0
+        } else {
+            return newsFeedViewModel?.news[indexPath.row].sizes.totalHeight ?? 0
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "newsCell", for: indexPath) as! NewsFeedTableViewCell
         cell.delegate = self
-        guard let viewModel = newsFeedViewModel?.news[indexPath.row] else { return UITableViewCell() }
+        var optionalViewModel: NewsFeed.ShowNews.ViewModel.Cell?
+        if !titleView.isSeachTextViewEmpty {
+            optionalViewModel = newsFeedViewModelSearhResult?.news[indexPath.row]
+        } else {
+            optionalViewModel = newsFeedViewModel?.news[indexPath.row]
+        }
+        guard let viewModel = optionalViewModel else { return UITableViewCell() }
         cell.setupElements(with: viewModel)
+        cell.selectionStyle = .none
         return cell
     }
     
@@ -134,4 +166,21 @@ extension NewsFeedViewController: NewsFeedTableViewCellDelegate {
         interactor?.showFullText(request: NewsFeed.ShowFullPostText.Request(postId: postId,
                                                                             newsFeedViewModel: newsFeedViewModel!))
     }
+}
+
+extension NewsFeedViewController: UITextFieldDelegate, NavigationControllerViewDelegate {
+    
+    func textFieldWasEdited(text: String) {
+        if !text.isEmpty {
+            let request = NewsFeed.SearchGroup.Request(sourceNewsFeedViewModel: newsFeedViewModel,
+                                                       searchedGroupName: text)
+            interactor?.searchGroupRequest(request: request)
+        }
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.endEditing(true)
+        return false
+    }
+
 }

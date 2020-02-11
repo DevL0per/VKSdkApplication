@@ -46,17 +46,20 @@ class RowLayout: UICollectionViewLayout {
         
         let ratios = photosSizes.map {(photoSize) in photoSize.width / photoSize.height }
         var xOffSet: CGFloat = 0
-        for item in 0..<collectionView.numberOfItems(inSection: 0) {
+        
+        let numberOfItems = collectionView.numberOfItems(inSection: 0)
+        for item in 0..<numberOfItems {
             let indexPath = IndexPath(row: item, section: 0)
             let photoWidth = photoHeight * ratios[item]
             let frame = CGRect(origin: CGPoint(x: xOffSet, y: 0), size: CGSize(width: photoWidth, height: photoHeight))
             let insetFrame = frame.insetBy(dx: RowLayout.cellPadding, dy: RowLayout.cellPadding)
             let layoutAttribute =  UICollectionViewLayoutAttributes(forCellWith: indexPath)
             layoutAttribute.frame = insetFrame
-            contentWidth = contentWidth+photoWidth+8
+            contentWidth = contentWidth+photoWidth
             cache.append(layoutAttribute)
             xOffSet += photoWidth
         }
+        contentWidth += RowLayout.cellPadding
     }
     
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {

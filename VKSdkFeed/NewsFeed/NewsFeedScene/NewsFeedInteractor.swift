@@ -16,7 +16,8 @@ protocol NewsFeedBusinessLogic {
     func getNews(request: NewsFeed.ShowNews.Request)
     func getUserInfo(request: NewsFeed.ShowUserInfo.Request)
     func showFullText(request: NewsFeed.ShowFullPostText.Request)
-    func showPreviousNews(requset: NewsFeed.ShowPreviousNews.Request)
+    func showPreviousNews(request: NewsFeed.ShowPreviousNews.Request)
+    func searchGroupRequest(request: NewsFeed.SearchGroup.Request)
 }
 
 protocol NewsFeedDataStore {
@@ -32,7 +33,7 @@ class NewsFeedInteractor: NewsFeedBusinessLogic, NewsFeedDataStore {
     func getNews(request: NewsFeed.ShowNews.Request) {
         datafetcher.fetchData(startTime: startTime) { [unowned self] (response) in
             guard let response = response else { return }
-            self.startTime = response.response.startFrom
+            self.startTime = response.response.nextFrom
             self.presenter?.presentNews(response: NewsFeed.ShowNews.Response(newsFeedResponse: response))
         }
     }
@@ -50,11 +51,21 @@ class NewsFeedInteractor: NewsFeedBusinessLogic, NewsFeedDataStore {
                                                                              newsFeedViewModel: request.newsFeedViewModel))
     }
     
-    func showPreviousNews(requset: NewsFeed.ShowPreviousNews.Request) {
+    func showPreviousNews(request: NewsFeed.ShowPreviousNews.Request) {
         datafetcher.fetchData(startTime: startTime) { [unowned self] (response) in
             guard let response = response else { return }
-            self.startTime = response.response.startFrom
-            self.presenter?.presentNews(response: NewsFeed.ShowNews.Response(newsFeedResponse: response))
+            self.startTime = response.response.nextFrom
+            self.presenter?.presentPreviousNews(response: NewsFeed.ShowPreviousNews.Response(newsFeedViewModel: request.newsFeedViewModel, newsFeedResponse: response))
         }
+    }
+    
+    func searchGroupRequest(request: NewsFeed.SearchGroup.Request) {
+        guard let news = request.sourceNewsFeedViewModel?.news else { return }
+        let searchedResult = news.filter { (item) -> Bool in
+            item.name.lowercased().contains(request.searchedGroupName.lowercased()) ? true : false
+        }
+        let resultViewModel = NewsFeed.ShowNews.ViewModel(news: searchedResult)
+        let response = NewsFeed.SearchGroup.Response(resultOfSearching: resultViewModel)
+        presenter?.presentSearchedGroups(response: response)
     }
 }

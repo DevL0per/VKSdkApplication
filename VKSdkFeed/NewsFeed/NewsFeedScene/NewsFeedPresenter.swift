@@ -17,6 +17,7 @@ protocol NewsFeedPresentationLogic {
     func showFullText(response: NewsFeed.ShowFullPostText.Response)
     func presentUserInfo(response: NewsFeed.ShowUserInfo.Response)
     func presentPreviousNews(response: NewsFeed.ShowPreviousNews.Response)
+    func presentSearchedGroups(response: NewsFeed.SearchGroup.Response)
 }
 
 class NewsFeedPresenter: NewsFeedPresentationLogic {
@@ -33,19 +34,16 @@ class NewsFeedPresenter: NewsFeedPresentationLogic {
     }()
     
     func presentNews(response: NewsFeed.ShowNews.Response) {
-        let groups = response.newsFeedResponse.response.groups
-        let profiles = response.newsFeedResponse.response.profiles
-        items = response.newsFeedResponse.response.items
-        let cells = response.newsFeedResponse.response.items.map { (feedItem) in
-            getNewsFeedViewModel(from: feedItem, profiles: profiles, groups: groups)
-        }
+        let cells = getCells(from: response.newsFeedResponse)
         let newsFeedViewModel = NewsFeed.ShowNews.ViewModel(news: cells)
         viewController?.displayNews(viewModel: newsFeedViewModel)
     }
     
     func presentPreviousNews(response: NewsFeed.ShowPreviousNews.Response) {
-        let viewModel = response.newsFeedViewModel
-        
+        let cells = getCells(from: response.newsFeedResponse)
+        var viewModel = response.newsFeedViewModel
+        viewModel.news.append(contentsOf: cells)
+        viewController?.displayNews(viewModel: viewModel)
     }
     
     func presentUserInfo(response: NewsFeed.ShowUserInfo.Response) {
@@ -55,7 +53,13 @@ class NewsFeedPresenter: NewsFeedPresentationLogic {
         viewController?.displayUserInfo(viewModel: viewModel)
     }
     
-    private func getCells(from response: NewsFeedResponse) -> ItemsData {
+    func presentSearchedGroups(response: NewsFeed.SearchGroup.Response) {
+        guard let results = response.resultOfSearching else { return }
+        let viewModel = NewsFeed.SearchGroup.ViewModel(resultOfSearching: results)
+        viewController?.displaySearchedGroups(viewModel: viewModel)
+    }
+    
+    private func getCells(from response: NewsFeedResponse) -> [NewsFeed.ShowNews.ViewModel.Cell] {
         let groups = response.response.groups
         let profiles = response.response.profiles
         items = response.response.items

@@ -31,6 +31,7 @@
 		F6E7F14423DE422900E31E9A /* NewsFeedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E7F13E23DE422900E31E9A /* NewsFeedViewController.swift */; };
 		F6E7F14523DE422900E31E9A /* NewsFeedInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E7F13F23DE422900E31E9A /* NewsFeedInteractor.swift */; };
 		F6E7F14823DE42E400E31E9A /* NewsFeedTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E7F14723DE42E400E31E9A /* NewsFeedTableViewCell.swift */; };
+		F6E94B0423F31BD300DD0456 /* Extension+UIScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E94B0323F31BD300DD0456 /* Extension+UIScrollView.swift */; };
 		F6EB272223E3846900D65985 /* SizesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EB272123E3846900D65985 /* SizesManager.swift */; };
 		F6EB272423E384B400D65985 /* Extension+String.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EB272323E384B400D65985 /* Extension+String.swift */; };
 		F6EB272723E5D37E00D65985 /* PhotosCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EB272623E5D37E00D65985 /* PhotosCollectionViewController.swift */; };
@@ -68,6 +69,7 @@
 		F6E7F13E23DE422900E31E9A /* NewsFeedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsFeedViewController.swift; sourceTree = "<group>"; };
 		F6E7F13F23DE422900E31E9A /* NewsFeedInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsFeedInteractor.swift; sourceTree = "<group>"; };
 		F6E7F14723DE42E400E31E9A /* NewsFeedTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsFeedTableViewCell.swift; sourceTree = "<group>"; };
+		F6E94B0323F31BD300DD0456 /* Extension+UIScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Extension+UIScrollView.swift"; sourceTree = "<group>"; };
 		F6EB272123E3846900D65985 /* SizesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SizesManager.swift; sourceTree = "<group>"; };
 		F6EB272323E384B400D65985 /* Extension+String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Extension+String.swift"; sourceTree = "<group>"; };
 		F6EB272623E5D37E00D65985 /* PhotosCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotosCollectionViewController.swift; sourceTree = "<group>"; };
@@ -214,6 +216,7 @@
 			children = (
 				F6D89BC723DDF67800619EA7 /* Extension+ViewController.swift */,
 				F6EB272323E384B400D65985 /* Extension+String.swift */,
+				F6E94B0323F31BD300DD0456 /* Extension+UIScrollView.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -383,6 +386,7 @@
 				F639CD6723EB003700A0CEFF /* NavigationControllerView.swift in Sources */,
 				F6E7F14523DE422900E31E9A /* NewsFeedInteractor.swift in Sources */,
 				F6E7F14023DE422900E31E9A /* NewsFeedPresenter.swift in Sources */,
+				F6E94B0423F31BD300DD0456 /* Extension+UIScrollView.swift in Sources */,
 				F6E7F14123DE422900E31E9A /* NewsFeedWorker.swift in Sources */,
 				F6E7F14823DE42E400E31E9A /* NewsFeedTableViewCell.swift in Sources */,
 				F6D89BC823DDF67800619EA7 /* Extension+ViewController.swift in Sources */,

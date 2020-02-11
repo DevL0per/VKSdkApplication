@@ -10,7 +10,7 @@ import UIKit
 
 struct Constants {
     static let backgroundViewSizes = UIEdgeInsets(top: 0, left: 8, bottom: 8, right: 8)
-    static let bottomViewHeight: CGFloat = 60
+    static let bottomViewHeight: CGFloat = 40
     static let topViewHeight: CGFloat = 70
     static let postText = UIEdgeInsets(top: Constants.topViewHeight + 8, left: 8, bottom: 0, right: 8)
     static let postTextMaxLines = 7
@@ -71,7 +71,7 @@ class SizesManager {
             
         }
         
-        let bottomViewTop = max(attachmentSize.maxY, maxTextY) + 10
+        let bottomViewTop = max(attachmentSize.maxY, maxTextY, Constants.topViewHeight) + 10
         let bottomFrame = CGRect(origin: CGPoint(x: 0, y: bottomViewTop),
                                  size: CGSize(width: backgroundViewWidth,
                                               height: Constants.bottomViewHeight))

@@ -14,6 +14,7 @@ class NavigationControllerTextView: UITextField  {
         super.init(frame: frame)
         translatesAutoresizingMaskIntoConstraints = false
         layer.cornerRadius = 10
+        clearButtonMode = .whileEditing
         
         let image = UIImage(named: "search")
         leftView = UIImageView(image: image)
@@ -31,15 +32,21 @@ class NavigationControllerTextView: UITextField  {
     override func leftViewRect(forBounds bounds: CGRect) -> CGRect {
         var frame = super.leftViewRect(forBounds: bounds)
         frame.origin.x += 5
-        frame.origin.y += 5
         frame.size.width = 18
+        frame.origin.y += 5
         frame.size.height = 18
         return frame
     }
     
+    override func editingRect(forBounds bounds: CGRect) -> CGRect {
+        return bounds.insetBy(dx: 30, dy: 0)
+    }
+    
+    override func placeholderRect(forBounds bounds: CGRect) -> CGRect {
+        return bounds.insetBy(dx: 30, dy: 0)
+    }
+    
     override func textRect(forBounds bounds: CGRect) -> CGRect {
-        var frame = super.textRect(forBounds: bounds)
-        frame.origin.x += 5
-        return frame
+        return bounds.insetBy(dx: 30, dy: 0)
     }
 }

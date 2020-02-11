@@ -68,7 +68,21 @@ enum NewsFeed {
         struct ViewModel {
             var newsFeedViewModel: NewsFeed.ShowNews.ViewModel
         }
+    }
+    
+    enum SearchGroup {
+        struct Request {
+            var sourceNewsFeedViewModel: NewsFeed.ShowNews.ViewModel?
+            var searchedGroupName: String
+        }
         
+        struct Response {
+            var resultOfSearching: NewsFeed.ShowNews.ViewModel?
+        }
+        
+        struct ViewModel {
+            var resultOfSearching: NewsFeed.ShowNews.ViewModel?
+        }
     }
     
     enum ShowFullPostText {

@@ -8,9 +8,20 @@
 
 import UIKit
 
+protocol NavigationControllerViewDelegate {
+    func textFieldWasEdited(text: String)
+}
+
 final class NavigationControllerView: UIView {
     
-    private var navigationControllerTextView: NavigationControllerTextView
+    var navigationControllerTextView: NavigationControllerTextView
+    var delegate: NavigationControllerViewDelegate!
+    
+    var isSeachTextViewEmpty: Bool {
+        guard let text = navigationControllerTextView.text else { return true}
+        return text.isEmpty
+    }
+    
     private var rightImageView: NewsFeedImageView = {
         let imageView = NewsFeedImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -53,9 +64,17 @@ final class NavigationControllerView: UIView {
     
     private func setupTextView() {
         addSubview(navigationControllerTextView)
+        navigationControllerTextView.translatesAutoresizingMaskIntoConstraints = false
         navigationControllerTextView.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
         navigationControllerTextView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
         navigationControllerTextView.heightAnchor.constraint(equalToConstant: 35).isActive = true
         navigationControllerTextView.trailingAnchor.constraint(equalTo: rightImageView.leadingAnchor, constant: -10).isActive = true
+        
+        navigationControllerTextView.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+    }
+    
+    @objc private func textFieldDidChange() {
+        guard let text = navigationControllerTextView.text else { return }
+        delegate.textFieldWasEdited(text: text)
     }
 }

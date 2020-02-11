@@ -13,7 +13,7 @@ final class DataFetcher<T: Decodable> {
     func fetchData(startTime: String?, complition: @escaping (T?) -> ()) {
         var dictionary = ["filters": "post,photo"]
         if let startTime = startTime {
-            dictionary["start_time"] = startTime
+            dictionary["start_from"] = startTime
         }
         let apiService = APIService(dictionary: dictionary, path: URLStructure.path)
         apiService.getData() { (data, error) in

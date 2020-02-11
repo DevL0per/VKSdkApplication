@@ -22,7 +22,7 @@ class NewsFeedTableViewCell: UITableViewCell {
     private var textHideLineButton: UIButton = {
         let button = UIButton()
         button.setTitle("Показать полностью...", for: .normal)
-        button.setTitleColor(#colorLiteral(red: 0.3778024451, green: 0.7568627596, blue: 0.9686274529, alpha: 1), for: .normal)
+        button.setTitleColor(#colorLiteral(red: 0, green: 0.5415384173, blue: 0.6787981391, alpha: 1), for: .normal)
         button.contentVerticalAlignment = .center
         button.contentHorizontalAlignment = .left
         button.titleLabel?.font = UIFont.systemFont(ofSize: 15)
