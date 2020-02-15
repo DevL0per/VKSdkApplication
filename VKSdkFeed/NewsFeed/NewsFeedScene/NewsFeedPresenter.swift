@@ -18,6 +18,7 @@ protocol NewsFeedPresentationLogic {
     func presentUserInfo(response: NewsFeed.ShowUserInfo.Response)
     func presentPreviousNews(response: NewsFeed.ShowPreviousNews.Response)
     func presentSearchedGroups(response: NewsFeed.SearchGroup.Response)
+    func reloadData()
 }
 
 class NewsFeedPresenter: NewsFeedPresentationLogic {
@@ -41,8 +42,8 @@ class NewsFeedPresenter: NewsFeedPresentationLogic {
     
     func presentPreviousNews(response: NewsFeed.ShowPreviousNews.Response) {
         let cells = getCells(from: response.newsFeedResponse)
-        var viewModel = response.newsFeedViewModel
-        viewModel.news.append(contentsOf: cells)
+        items?+=response.newsFeedResponse.response.items
+        let viewModel = NewsFeed.ShowNews.ViewModel(news: cells)
         viewController?.displayNews(viewModel: viewModel)
     }
     
@@ -62,11 +63,19 @@ class NewsFeedPresenter: NewsFeedPresentationLogic {
     private func getCells(from response: NewsFeedResponse) -> [NewsFeed.ShowNews.ViewModel.Cell] {
         let groups = response.response.groups
         let profiles = response.response.profiles
-        items = response.response.items
+        if items == nil {
+            items = response.response.items
+        } else {
+            items! += response.response.items
+        }
         let cells = response.response.items.map { (feedItem) in
             getNewsFeedViewModel(from: feedItem, profiles: profiles, groups: groups)
         }
         return cells
+    }
+    
+    func reloadData() {
+        items = nil
     }
     
     private func getNewsFeedViewModel(from item: ItemsData, profiles: [Profiles], groups: [Group]) -> NewsFeed.ShowNews.ViewModel.Cell {

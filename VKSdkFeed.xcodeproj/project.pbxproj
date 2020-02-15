@@ -173,8 +173,6 @@
 			children = (
 				F6D89BC623DDF66200619EA7 /* Extension */,
 				F6D89BC123DDF26E00619EA7 /* NewsFeed */,
-				F6E7F14623DE429300E31E9A /* NewsFeedCell */,
-				F6EB272523E5D31400D65985 /* CollectionView */,
 				F6D89BBC23DDF0E000619EA7 /* Authentication */,
 				F6E7F12923DE0E1200E31E9A /* Models */,
 				F6D89BB923DB995C00619EA7 /* Serveces */,
@@ -205,6 +203,8 @@
 		F6D89BC123DDF26E00619EA7 /* NewsFeed */ = {
 			isa = PBXGroup;
 			children = (
+				F6EB272523E5D31400D65985 /* CollectionView */,
+				F6E7F14623DE429300E31E9A /* NewsFeedCell */,
 				F639CD6523EAFFF000A0CEFF /* NavigationControllerView */,
 				F67B4AB823EEEBF1002222CD /* NewsFeedScene */,
 			);

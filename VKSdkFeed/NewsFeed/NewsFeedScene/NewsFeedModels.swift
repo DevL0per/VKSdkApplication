@@ -57,11 +57,9 @@ enum NewsFeed {
     
     enum ShowPreviousNews {
         struct Request {
-            var newsFeedViewModel: NewsFeed.ShowNews.ViewModel
         }
         
         struct Response {
-            var newsFeedViewModel: NewsFeed.ShowNews.ViewModel
             let newsFeedResponse: NewsFeedResponse
         }
         
@@ -115,4 +113,5 @@ enum NewsFeed {
             let imageURL: String
         }
     }
+    
 }

@@ -28,8 +28,13 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
     var newsFeedViewModelSearhResult: NewsFeed.ShowNews.ViewModel?
     
     var refreshControl: UIRefreshControl!
+    var bottomRefreshControll: UIActivityIndicatorView!
     
     let titleView = NavigationControllerView()
+    var isScrollToTopNeeded: Bool = true
+    var isSearchedResultsNeedToAppend: Bool = false
+    var isNeededToSearch: Bool = true
+    var isNewsFeedViewModelNeededToAppend: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,6 +44,11 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
         setupRefreshControl()
         interactor?.getNews(request: NewsFeed.ShowNews.Request())
         interactor?.getUserInfo(request: NewsFeed.ShowUserInfo.Request())
+        newsTableView.addGestureRecognizer(UIGestureRecognizer(target: self, action: #selector(hideKeyBoard)))
+    }
+    
+    @objc func hideKeyBoard() {
+        titleView.endEditing(true)
     }
     
     private func setupNewsTableView() {
@@ -54,32 +64,64 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
         newsTableView.delegate = self
         newsTableView.dataSource = self
         newsTableView.register(NewsFeedTableViewCell.self, forCellReuseIdentifier: "newsCell")
+        bottomRefreshControll = UIActivityIndicatorView()
+        bottomRefreshControll.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: 40)
+        bottomRefreshControll.hidesWhenStopped = true
+        newsTableView.tableFooterView = bottomRefreshControll
     }
     
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        print(scrollView.contentSize.height)
-        if scrollView.contentOffset.y > scrollView.contentSize.height/2 {
+        
+        if scrollView.contentOffset.y >= (scrollView.contentSize.height - scrollView.frame.size.height) {
             if newsFeedViewModel != nil {
-                let request = NewsFeed.ShowPreviousNews.Request(newsFeedViewModel: newsFeedViewModel!)
+                bottomRefreshControll.startAnimating()
+                let request = NewsFeed.ShowPreviousNews.Request()
                 interactor?.showPreviousNews(request: request)
+                self.isNewsFeedViewModelNeededToAppend = true
+                self.isSearchedResultsNeedToAppend = true
             }
         }
     }
-
+    
     func displaySearchedGroups(viewModel: NewsFeed.SearchGroup.ViewModel) {
-        newsFeedViewModelSearhResult = viewModel.resultOfSearching
+        if newsFeedViewModelSearhResult != nil && isSearchedResultsNeedToAppend {
+            isSearchedResultsNeedToAppend = false
+            guard let news = viewModel.resultOfSearching?.news else { return }
+            newsFeedViewModelSearhResult?.news.append(contentsOf: news)
+        } else {
+            newsFeedViewModelSearhResult = viewModel.resultOfSearching
+        }
         newsTableView.reloadData()
-        newsTableView.layoutIfNeeded()
+        if isScrollToTopNeeded {
+            scrollTableViewToTop()
+        } else {
+            isScrollToTopNeeded = true
+        }
     }
     
     func displayNews(viewModel: NewsFeed.ShowNews.ViewModel) {
         DispatchQueue.main.async { [unowned self] in
-            self.newsFeedViewModel = viewModel
-            if !self.titleView.isSeachTextViewEmpty {
-                self.textFieldWasEdited(text: self.titleView.navigationControllerTextView.text!)
+            if !self.titleView.isSeachTextViewEmpty && self.isNeededToSearch {
+                self.isScrollToTopNeeded = false
+                let request = NewsFeed.SearchGroup.Request(sourceNewsFeedViewModel: viewModel,
+                                                           searchedGroupName: self.titleView.navigationControllerTextView.text!)
+                self.interactor?.searchGroupRequest(request: request)
+            } else if !self.titleView.isSeachTextViewEmpty && !self.isNeededToSearch {
+                self.isNeededToSearch = true
+                self.newsFeedViewModelSearhResult = viewModel
+                self.newsTableView.reloadData()
+            } else {
+                if self.newsFeedViewModel != nil && self.isNewsFeedViewModelNeededToAppend {
+                    self.newsFeedViewModel?.news.append(contentsOf: viewModel.news)
+                } else {
+                    self.newsFeedViewModel = viewModel
+                }
+                self.newsTableView.reloadData()
             }
-            self.newsTableView.reloadData()
+            self.isNewsFeedViewModelNeededToAppend = false
+            self.isSearchedResultsNeedToAppend = false
             self.refreshControl.endRefreshing()
+            self.bottomRefreshControll.stopAnimating()
         }
     }
     
@@ -91,10 +133,9 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
     
     private func setupNavigationBar() {
         navigationController?.hidesBarsOnSwipe = true
-        navigationItem.titleView = titleView
         titleView.navigationControllerTextView.delegate = self
+        navigationItem.titleView = titleView
         titleView.delegate = self
-        //titleView.navigationControllerTextView.addTarget(NewsFeedViewController.self, action: #selector(textFieldWasEdited), for: .editingChanged)
     }
     
     private func setupRefreshControl() {
@@ -155,7 +196,18 @@ extension NewsFeedViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-        return newsFeedViewModel?.news[indexPath.row].sizes.totalHeight ?? 0
+        if titleView.isSeachTextViewEmpty {
+            return newsFeedViewModel?.news[indexPath.row].sizes.totalHeight ?? 0
+        } else {
+            return newsFeedViewModelSearhResult?.news[indexPath.row].sizes.totalHeight ?? 0
+        }
+    }
+    
+    func scrollTableViewToTop() {
+        if newsTableView.numberOfRows(inSection: 0) > 0 {
+            let indexPath = IndexPath(row: 0, section: 0)
+            newsTableView.scrollToRow(at: indexPath, at: .top, animated: true)
+        }
     }
     
 }
@@ -163,6 +215,10 @@ extension NewsFeedViewController: UITableViewDelegate, UITableViewDataSource {
 extension NewsFeedViewController: NewsFeedTableViewCellDelegate {
     
     func fullTextRequest(postId: Int) {
+        self.isNeededToSearch = false
+        var newsFeedViewModel: NewsFeed.ShowNews.ViewModel?
+        newsFeedViewModel = titleView.isSeachTextViewEmpty ? self.newsFeedViewModel :
+                            newsFeedViewModelSearhResult
         interactor?.showFullText(request: NewsFeed.ShowFullPostText.Request(postId: postId,
                                                                             newsFeedViewModel: newsFeedViewModel!))
     }
@@ -170,11 +226,17 @@ extension NewsFeedViewController: NewsFeedTableViewCellDelegate {
 
 extension NewsFeedViewController: UITextFieldDelegate, NavigationControllerViewDelegate {
     
+    /////ДОПИЛИТЬ
     func textFieldWasEdited(text: String) {
+        interactor?.getNews(request: NewsFeed.ShowNews.Request())
         if !text.isEmpty {
             let request = NewsFeed.SearchGroup.Request(sourceNewsFeedViewModel: newsFeedViewModel,
                                                        searchedGroupName: text)
             interactor?.searchGroupRequest(request: request)
+        } else {
+            interactor?.getNews(request: NewsFeed.ShowNews.Request())
+            newsTableView.reloadData()
+            scrollTableViewToTop()
         }
     }
     

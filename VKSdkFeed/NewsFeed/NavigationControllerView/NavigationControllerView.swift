@@ -65,6 +65,7 @@ final class NavigationControllerView: UIView {
     private func setupTextView() {
         addSubview(navigationControllerTextView)
         navigationControllerTextView.translatesAutoresizingMaskIntoConstraints = false
+        navigationControllerTextView.autocorrectionType = .no
         navigationControllerTextView.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
         navigationControllerTextView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
         navigationControllerTextView.heightAnchor.constraint(equalToConstant: 35).isActive = true

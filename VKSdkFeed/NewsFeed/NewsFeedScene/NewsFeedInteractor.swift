@@ -18,6 +18,7 @@ protocol NewsFeedBusinessLogic {
     func showFullText(request: NewsFeed.ShowFullPostText.Request)
     func showPreviousNews(request: NewsFeed.ShowPreviousNews.Request)
     func searchGroupRequest(request: NewsFeed.SearchGroup.Request)
+    func reloadData()
 }
 
 protocol NewsFeedDataStore {
@@ -31,8 +32,11 @@ class NewsFeedInteractor: NewsFeedBusinessLogic, NewsFeedDataStore {
     let datafetcher = DataFetcher<NewsFeedResponse>()
     
     func getNews(request: NewsFeed.ShowNews.Request) {
-        datafetcher.fetchData(startTime: startTime) { [unowned self] (response) in
+        datafetcher.fetchData(startTime: nil) { [unowned self] (response) in
             guard let response = response else { return }
+            if response.response.nextFrom == nil {
+                print("kek")
+            }
             self.startTime = response.response.nextFrom
             self.presenter?.presentNews(response: NewsFeed.ShowNews.Response(newsFeedResponse: response))
         }
@@ -55,8 +59,13 @@ class NewsFeedInteractor: NewsFeedBusinessLogic, NewsFeedDataStore {
         datafetcher.fetchData(startTime: startTime) { [unowned self] (response) in
             guard let response = response else { return }
             self.startTime = response.response.nextFrom
-            self.presenter?.presentPreviousNews(response: NewsFeed.ShowPreviousNews.Response(newsFeedViewModel: request.newsFeedViewModel, newsFeedResponse: response))
+            self.presenter?.presentPreviousNews(response: NewsFeed.ShowPreviousNews.Response(newsFeedResponse: response))
         }
+    }
+    
+    func reloadData() {
+        startTime = nil
+        presenter?.reloadData()
     }
     
     func searchGroupRequest(request: NewsFeed.SearchGroup.Request) {
