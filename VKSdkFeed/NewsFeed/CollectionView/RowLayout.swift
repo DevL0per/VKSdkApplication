@@ -59,7 +59,6 @@ class RowLayout: UICollectionViewLayout {
             cache.append(layoutAttribute)
             xOffSet += photoWidth
         }
-        contentWidth += RowLayout.cellPadding
     }
     
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {

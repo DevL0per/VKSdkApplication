@@ -20,6 +20,8 @@ protocol NewsFeedDisplayLogic: class {
 
 class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
     
+    private let configurator: NewsFeedConfiguratorProtocol = NewsFeedConfigurator()
+    
     var interactor: NewsFeedBusinessLogic?
     var router: (NSObjectProtocol & NewsFeedRoutingLogic & NewsFeedDataPassing)?
     
@@ -31,6 +33,7 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
     var bottomRefreshControll: UIActivityIndicatorView!
     
     let titleView = NavigationControllerView()
+    
     var isScrollToTopNeeded: Bool = true
     var isSearchedResultsNeedToAppend: Bool = false
     var isNeededToSearch: Bool = true
@@ -38,49 +41,12 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setup()
+        configurator.configure(view: self)
         setupNewsTableView()
         setupNavigationBar()
         setupRefreshControl()
         interactor?.getNews(request: NewsFeed.ShowNews.Request())
         interactor?.getUserInfo(request: NewsFeed.ShowUserInfo.Request())
-        newsTableView.addGestureRecognizer(UIGestureRecognizer(target: self, action: #selector(hideKeyBoard)))
-    }
-    
-    @objc func hideKeyBoard() {
-        titleView.endEditing(true)
-    }
-    
-    private func setupNewsTableView() {
-        newsTableView = UITableView()
-        view.addSubview(newsTableView)
-        newsTableView.translatesAutoresizingMaskIntoConstraints = false
-        newsTableView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
-        newsTableView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
-        newsTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        newsTableView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
-        newsTableView.contentInset.top = 10
-        newsTableView.backgroundColor = #colorLiteral(red: 0.1764705926, green: 0.4980392158, blue: 0.7568627596, alpha: 1)
-        newsTableView.delegate = self
-        newsTableView.dataSource = self
-        newsTableView.register(NewsFeedTableViewCell.self, forCellReuseIdentifier: "newsCell")
-        bottomRefreshControll = UIActivityIndicatorView()
-        bottomRefreshControll.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: 40)
-        bottomRefreshControll.hidesWhenStopped = true
-        newsTableView.tableFooterView = bottomRefreshControll
-    }
-    
-    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        
-        if scrollView.contentOffset.y >= (scrollView.contentSize.height - scrollView.frame.size.height) {
-            if newsFeedViewModel != nil {
-                bottomRefreshControll.startAnimating()
-                let request = NewsFeed.ShowPreviousNews.Request()
-                interactor?.showPreviousNews(request: request)
-                self.isNewsFeedViewModelNeededToAppend = true
-                self.isSearchedResultsNeedToAppend = true
-            }
-        }
     }
     
     func displaySearchedGroups(viewModel: NewsFeed.SearchGroup.ViewModel) {
@@ -131,6 +97,18 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
         }
     }
     
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if scrollView.contentOffset.y >= (scrollView.contentSize.height - scrollView.frame.size.height) {
+            if newsFeedViewModel != nil {
+                bottomRefreshControll.startAnimating()
+                let request = NewsFeed.ShowPreviousNews.Request()
+                interactor?.showPreviousNews(request: request)
+                self.isNewsFeedViewModelNeededToAppend = true
+                self.isSearchedResultsNeedToAppend = true
+            }
+        }
+    }
+    
     private func setupNavigationBar() {
         navigationController?.hidesBarsOnSwipe = true
         titleView.navigationControllerTextView.delegate = self
@@ -145,26 +123,37 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
         definesPresentationContext = true
     }
     
-    @objc func refreshNews() {
+    private func setupNewsTableView() {
+        newsTableView = UITableView()
+        view.addSubview(newsTableView)
+        newsTableView.translatesAutoresizingMaskIntoConstraints = false
+        newsTableView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        newsTableView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        newsTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        newsTableView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        newsTableView.contentInset.top = 10
+        newsTableView.backgroundColor = #colorLiteral(red: 0.368627451, green: 0.5098039216, blue: 0.662745098, alpha: 1)
+        newsTableView.delegate = self
+        newsTableView.dataSource = self
+        newsTableView.register(NewsFeedTableViewCell.self, forCellReuseIdentifier: "newsCell")
+        
+        setupBottomViewForNewsTableView()
+        newsTableView.tableFooterView = bottomRefreshControll
+    }
+    
+    private func setupBottomViewForNewsTableView() {
+        bottomRefreshControll = UIActivityIndicatorView()
+        bottomRefreshControll.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: 40)
+        bottomRefreshControll.hidesWhenStopped = true
+    }
+    
+    @objc private func refreshNews() {
         interactor?.getNews(request: NewsFeed.ShowNews.Request())
     }
     
-    // MARK: Setup
-    
-    private func setup() {
-        let viewController = self
-        let interactor = NewsFeedInteractor()
-        let presenter = NewsFeedPresenter()
-        let router = NewsFeedRouter()
-        viewController.interactor = interactor
-        viewController.router = router
-        interactor.presenter = presenter
-        presenter.viewController = viewController
-        router.viewController = viewController
-        router.dataStore = interactor
-    }
 }
 
+// MARK: - NewsTableViewDelegate and NewsTableViewDataSource
 extension NewsFeedViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -212,21 +201,22 @@ extension NewsFeedViewController: UITableViewDelegate, UITableViewDataSource {
     
 }
 
+// MARK: - NewsFeedTableViewCellDelegate
 extension NewsFeedViewController: NewsFeedTableViewCellDelegate {
     
     func fullTextRequest(postId: Int) {
         self.isNeededToSearch = false
         var newsFeedViewModel: NewsFeed.ShowNews.ViewModel?
         newsFeedViewModel = titleView.isSeachTextViewEmpty ? self.newsFeedViewModel :
-                            newsFeedViewModelSearhResult
+        newsFeedViewModelSearhResult
         interactor?.showFullText(request: NewsFeed.ShowFullPostText.Request(postId: postId,
                                                                             newsFeedViewModel: newsFeedViewModel!))
     }
 }
 
+// MARK: - Work with UITextField from NavigationControllerView
 extension NewsFeedViewController: UITextFieldDelegate, NavigationControllerViewDelegate {
     
-    /////ДОПИЛИТЬ
     func textFieldWasEdited(text: String) {
         interactor?.getNews(request: NewsFeed.ShowNews.Request())
         if !text.isEmpty {
@@ -244,5 +234,5 @@ extension NewsFeedViewController: UITextFieldDelegate, NavigationControllerViewD
         textField.endEditing(true)
         return false
     }
-
+    
 }

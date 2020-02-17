@@ -18,21 +18,13 @@ protocol NewsFeedPresentationLogic {
     func presentUserInfo(response: NewsFeed.ShowUserInfo.Response)
     func presentPreviousNews(response: NewsFeed.ShowPreviousNews.Response)
     func presentSearchedGroups(response: NewsFeed.SearchGroup.Response)
-    func reloadData()
 }
 
 class NewsFeedPresenter: NewsFeedPresentationLogic {
     
     weak var viewController: NewsFeedDisplayLogic?
-    private var sizesManager = SizesManager(viewWidth: UIScreen.main.bounds.width)
     private var items: [ItemsData]?
-    
-    let dateFormatter: DateFormatter = {
-        let dateFormatter = DateFormatter()
-        dateFormatter.locale = Locale(identifier: "ru_RU")
-        dateFormatter.dateFormat = "MMM d, h:mm"
-        return dateFormatter
-    }()
+    private var newsFeedPresenterWorker: NewsFeedPresenterWorkerProtocol = NewsFeedPresenterWorker()
     
     func presentNews(response: NewsFeed.ShowNews.Response) {
         let cells = getCells(from: response.newsFeedResponse)
@@ -60,6 +52,20 @@ class NewsFeedPresenter: NewsFeedPresentationLogic {
         viewController?.displaySearchedGroups(viewModel: viewModel)
     }
     
+    func showFullText(response: NewsFeed.ShowFullPostText.Response) {
+        var variableResponse = response
+        for (index, post) in variableResponse.newsFeedViewModel.news.enumerated() {
+            if post.postId == response.postId {
+                let item = items?.first(where: {$0.postId == response.postId})
+                let sizes = newsFeedPresenterWorker.sizesManager.getSizes(text: item?.text,
+                                                   attacments: newsFeedPresenterWorker.getPhotos(from: item!),
+                                                   fullTextWillShow: true)
+                variableResponse.newsFeedViewModel.news[index].sizes = sizes
+            }
+        }
+        viewController?.displayNews(viewModel: variableResponse.newsFeedViewModel)
+    }
+    
     private func getCells(from response: NewsFeedResponse) -> [NewsFeed.ShowNews.ViewModel.Cell] {
         let groups = response.response.groups
         let profiles = response.response.profiles
@@ -69,80 +75,9 @@ class NewsFeedPresenter: NewsFeedPresentationLogic {
             items! += response.response.items
         }
         let cells = response.response.items.map { (feedItem) in
-            getNewsFeedViewModel(from: feedItem, profiles: profiles, groups: groups)
+            newsFeedPresenterWorker.getNewsFeedViewModel(from: feedItem, profiles: profiles, groups: groups)
         }
         return cells
-    }
-    
-    func reloadData() {
-        items = nil
-    }
-    
-    private func getNewsFeedViewModel(from item: ItemsData, profiles: [Profiles], groups: [Group]) -> NewsFeed.ShowNews.ViewModel.Cell {
-        let profile = getProfile(sourceId: item.sourceId, profiles: profiles, groups: groups)
-        let date = Date(timeIntervalSince1970: item.date)
-        let dateString = dateFormatter.string(from: date)
-        let cell = NewsFeed.ShowNews.ViewModel.Cell(name: profile.name,
-                                                  date: dateString,
-                                                  postText: item.text ?? "",
-                                                  postId: item.postId ,
-                                                  likesCount: formatNumber(number: item.likes?.count),
-                                                  commentsCount: formatNumber(number: item.comments?.count),
-                                                  repostCount: formatNumber(number: item.reposts?.count),
-                                                  viewsCount: formatNumber(number: item.views?.count),
-                                                  profileImageURL: profile.photo100,
-                                                  photo: getPhotos(from: item),
-                                                  sizes: sizesManager.getSizes(text: item.text, attacments: getPhotos(from: item), fullTextWillShow: false)
-                                                  )
-        return cell
-    }
-    
-    private func getProfile(sourceId: Int, profiles: [Profiles], groups: [Group] ) -> profileInfo {
-        if sourceId < 0 {
-            let group = groups.first { (group) in
-                group.id == -sourceId
-            }
-            return group!
-        } else {
-            let profile = profiles.first { (profile) in
-                profile.id == sourceId
-            }
-            return profile!
-        }
-    }
-    
-    private func formatNumber(number: Int?) -> String {
-        guard let number = number else { return "0" }
-        var stringNumber = String(number)
-        if stringNumber.count == 4 || stringNumber.count == 5 {
-            stringNumber = String(stringNumber.dropLast(3))
-            stringNumber+="k"
-        } else if stringNumber.count >= 6 {
-            stringNumber = String(stringNumber.dropLast(5))
-            stringNumber+="m"
-        }
-        return stringNumber
-    }
-    
-    private func getPhotos(from item: ItemsData) -> [NewsFeed.ShowNews.ViewModel.Attachment]? {
-        let attachments = item.attachments?.compactMap({ (attachment) -> NewsFeed.ShowNews.ViewModel.Attachment? in
-            if let photo = attachment.photo {
-                return NewsFeed.ShowNews.ViewModel.Attachment(photoURL: photo.photoURL, width: photo.photoWidth, height: photo.photoHeight)
-            } else { return nil }
-        })
-        return attachments
-    }
-    
-    func showFullText(response: NewsFeed.ShowFullPostText.Response) {
-        var variableResponse = response
-        for (index, post) in variableResponse.newsFeedViewModel.news.enumerated() {
-            if post.postId == response.postId {
-                let item = items?.first(where: {$0.postId == response.postId})
-                let sizes = sizesManager.getSizes(text: item?.text, attacments: getPhotos(from: item!), fullTextWillShow: true)
-                variableResponse.newsFeedViewModel.news[index].sizes = sizes
-            }
-        }
-        viewController?.displayNews(viewModel: variableResponse.newsFeedViewModel)
     }
     
 }

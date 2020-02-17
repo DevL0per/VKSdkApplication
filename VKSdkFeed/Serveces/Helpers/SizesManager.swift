@@ -35,7 +35,6 @@ class SizesManager {
         let backgroundViewWidth = viewWidth - Constants.backgroundViewSizes.left -
             Constants.backgroundViewSizes.right
         
-        
         if let text = text, !text.isEmpty {
             let textWidth = backgroundViewWidth - Constants.postText.right -
                 Constants.postText.left
@@ -47,7 +46,7 @@ class SizesManager {
                                         size: CGSize(width: textWidth, height: 30))
             }
             let size = CGSize(width: textWidth, height: height)
-            textSize = CGRect(origin: CGPoint(x: 16, y: Constants.postText.top), size: size)
+            textSize = CGRect(origin: CGPoint(x: 8, y: Constants.postText.top), size: size)
         }
         
         var attachmentSize = CGRect.zero
@@ -61,12 +60,12 @@ class SizesManager {
                 }
                 if let photoHeight = RowLayout.getRowHeight(superViewWidth: backgroundViewWidth, photosSizes: photosSizes) {
                     let photoFrame = CGSize(width: backgroundViewWidth, height: photoHeight)
-                    attachmentSize = CGRect(origin: CGPoint(x: 8, y: topPosition), size: photoFrame)
+                    attachmentSize = CGRect(origin: CGPoint(x: 0, y: topPosition), size: photoFrame)
                 }
             } else if photoAttachmets.count == 1 {
                 let ratio: CGFloat = CGFloat(photoAttachmets.first!.width) / CGFloat(photoAttachmets.first!.height)
                 let photoFrame = CGSize(width: backgroundViewWidth, height: CGFloat(photoAttachmets.first!.height) / ratio)
-                attachmentSize = CGRect(origin: CGPoint(x: 8, y: topPosition), size: photoFrame)
+                attachmentSize = CGRect(origin: CGPoint(x: 0, y: topPosition), size: photoFrame)
             }
             
         }

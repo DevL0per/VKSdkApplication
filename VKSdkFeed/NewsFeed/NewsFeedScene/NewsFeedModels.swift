@@ -13,8 +13,10 @@
 import UIKit
 
 enum NewsFeed {
-    // MARK: Use cases
     
+    // MARK: - Use cases
+    
+    // MARK: - Show news
     enum ShowNews {
         struct Request {
         }
@@ -55,6 +57,7 @@ enum NewsFeed {
         }
     }
     
+    // MARK: - Show previous news
     enum ShowPreviousNews {
         struct Request {
         }
@@ -68,6 +71,7 @@ enum NewsFeed {
         }
     }
     
+    // MARK: - Search group by name
     enum SearchGroup {
         struct Request {
             var sourceNewsFeedViewModel: NewsFeed.ShowNews.ViewModel?
@@ -83,6 +87,8 @@ enum NewsFeed {
         }
     }
     
+    // MARK: - Open text in post
+    // full text will open when user click a button - "Показать полностью"
     enum ShowFullPostText {
         struct Request {
             let postId: Int
@@ -100,6 +106,7 @@ enum NewsFeed {
         
     }
     
+    // MARK: - Show user info
     enum ShowUserInfo {
         struct Request {
         }

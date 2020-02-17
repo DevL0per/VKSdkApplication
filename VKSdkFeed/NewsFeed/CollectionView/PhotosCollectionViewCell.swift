@@ -12,7 +12,6 @@ class PhotosCollectionViewCell: UICollectionViewCell {
     var photo: NewsFeedImageView = {
         let image = NewsFeedImageView()
         image.translatesAutoresizingMaskIntoConstraints = false
-        //image.contentMode = .scaleAspectFit
         image.backgroundColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
         image.layer.cornerRadius = 5
         image.clipsToBounds = true

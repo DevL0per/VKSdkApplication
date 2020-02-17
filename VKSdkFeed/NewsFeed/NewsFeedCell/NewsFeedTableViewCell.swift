@@ -35,7 +35,17 @@ class NewsFeedTableViewCell: UITableViewCell {
     private var topViewNameLabel =  UILabel()
     private var topViewDateLabel = UILabel()
     
-    private var centerTextLabel = UILabel()
+    private var centerTextLabel: UITextView = {
+        let textView = UITextView()
+        textView.isScrollEnabled = false
+        textView.isSelectable = true
+        textView.isEditable = false
+        
+        let padding = textView.textContainer.lineFragmentPadding
+        textView.textContainerInset = UIEdgeInsets.init(top: 0, left: -padding, bottom: 0, right: -padding)
+        textView.dataDetectorTypes = .all
+        return textView
+    }()
     private var centerImageView = NewsFeedImageView()
     
     private var bottonContentView = UIView()
@@ -59,7 +69,9 @@ class NewsFeedTableViewCell: UITableViewCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setupUI()
+        layoutFirstLayer()
+        layoutSecondLayer()
+        layoutThirdLayer()
         textHideLineButton.addTarget(self, action: #selector(textHideLineButtonWasPressed), for: .touchUpInside)
     }
     
@@ -113,29 +125,7 @@ class NewsFeedTableViewCell: UITableViewCell {
         delegate.fullTextRequest(postId: cellViewModel.postId)
     }
     
-    private func setupUI() {
-        
-        backgroundLayer.addSubview(photosCollectionView)
-        backgroundColor = #colorLiteral(red: 0.1764705926, green: 0.4980392158, blue: 0.7568627596, alpha: 1)
-        addSubview(backgroundLayer)
-        backgroundLayer.layer.cornerRadius = 10
-        backgroundLayer.clipsToBounds = true
-        backgroundLayer.backgroundColor = .white
-        backgroundLayer.translatesAutoresizingMaskIntoConstraints = false
-        backgroundLayer.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
-        backgroundLayer.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 8).isActive = true
-        backgroundLayer.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -8).isActive = true
-        backgroundLayer.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -8).isActive = true
-        
-        backgroundLayer.addSubview(textHideLineButton)
-        
-        backgroundLayer.addSubview(topContectView)
-        topContectView.translatesAutoresizingMaskIntoConstraints = false
-        topContectView.topAnchor.constraint(equalTo: backgroundLayer.topAnchor).isActive = true
-        topContectView.leftAnchor.constraint(equalTo: backgroundLayer.leftAnchor).isActive = true
-        topContectView.rightAnchor.constraint(equalTo: backgroundLayer.rightAnchor).isActive = true
-        topContectView.heightAnchor.constraint(equalToConstant: 60).isActive = true
-        
+    private func layoutThirdLayer() {
         topContectView.addSubview(topViewImage)
         topViewImage.translatesAutoresizingMaskIntoConstraints = false
         topViewImage.topAnchor.constraint(equalTo: topContectView.topAnchor, constant: 20).isActive = true
@@ -149,7 +139,6 @@ class NewsFeedTableViewCell: UITableViewCell {
         topViewNameLabel.leftAnchor.constraint(equalTo: topViewImage.rightAnchor, constant: 10).isActive = true
         topViewNameLabel.rightAnchor.constraint(equalTo: topContectView.rightAnchor, constant: -20).isActive = true
         topViewNameLabel.heightAnchor.constraint(equalToConstant: 20).isActive = true
-        topViewNameLabel.text = "Label"
         
         topContectView.addSubview(topViewDateLabel)
         topViewDateLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -158,22 +147,12 @@ class NewsFeedTableViewCell: UITableViewCell {
         topViewDateLabel.rightAnchor.constraint(equalTo: topContectView.rightAnchor, constant: -20).isActive = true
         topViewDateLabel.heightAnchor.constraint(equalToConstant: 20).isActive = true
         topViewDateLabel.textColor = #colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1)
-        topViewDateLabel.text = "Label"
         topViewDateLabel.font = topViewDateLabel.font.withSize(10)
-
-        addSubview(centerTextLabel)
-        centerTextLabel.font = UIFont.systemFont(ofSize: 15)
-        centerTextLabel.numberOfLines = 0
-        
-        addSubview(centerImageView)
-        centerImageView.backgroundColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
-        
-        backgroundLayer.addSubview(bottonContentView)
         
         bottonContentView.addSubview(likesImage)
         likesImage.image = UIImage(named: "like")
         likesImage.translatesAutoresizingMaskIntoConstraints = false
-        likesImage.leftAnchor.constraint(equalTo: bottonContentView.leftAnchor, constant: 20).isActive = true
+        likesImage.leftAnchor.constraint(equalTo: bottonContentView.leftAnchor, constant: 10).isActive = true
         likesImage.topAnchor.constraint(equalTo: bottonContentView.topAnchor, constant: 0).isActive = true
         likesImage.heightAnchor.constraint(equalToConstant: 20).isActive = true
         likesImage.widthAnchor.constraint(equalToConstant: 20).isActive = true
@@ -236,5 +215,36 @@ class NewsFeedTableViewCell: UITableViewCell {
         
     }
     
-
+    private func layoutSecondLayer() {
+        backgroundLayer.addSubview(topContectView)
+        backgroundColor = #colorLiteral(red: 0.368627451, green: 0.5098039216, blue: 0.662745098, alpha: 1)
+        topContectView.translatesAutoresizingMaskIntoConstraints = false
+        topContectView.topAnchor.constraint(equalTo: backgroundLayer.topAnchor).isActive = true
+        topContectView.leftAnchor.constraint(equalTo: backgroundLayer.leftAnchor).isActive = true
+        topContectView.rightAnchor.constraint(equalTo: backgroundLayer.rightAnchor).isActive = true
+        topContectView.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        
+        backgroundLayer.addSubview(centerTextLabel)
+        centerTextLabel.font = UIFont.systemFont(ofSize: 15)
+        
+        backgroundLayer.addSubview(centerImageView)
+        centerImageView.backgroundColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
+        
+        backgroundLayer.addSubview(bottonContentView)
+        backgroundLayer.addSubview(photosCollectionView)
+        backgroundLayer.addSubview(textHideLineButton)
+    }
+    
+    private func layoutFirstLayer() {
+        addSubview(backgroundLayer)
+        backgroundLayer.layer.cornerRadius = 10
+        backgroundLayer.clipsToBounds = true
+        backgroundLayer.backgroundColor = .white
+        backgroundLayer.translatesAutoresizingMaskIntoConstraints = false
+        backgroundLayer.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+        backgroundLayer.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 8).isActive = true
+        backgroundLayer.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -8).isActive = true
+        backgroundLayer.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -8).isActive = true
+    }
+    
 }
