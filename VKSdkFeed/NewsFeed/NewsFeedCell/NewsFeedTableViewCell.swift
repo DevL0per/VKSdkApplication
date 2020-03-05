@@ -10,6 +10,7 @@ import UIKit
 
 protocol NewsFeedTableViewCellDelegate {
     func fullTextRequest(postId: Int)
+    func performImageZoomIn(imageView: UIImageView)
 }
 
 class NewsFeedTableViewCell: UITableViewCell {
@@ -73,6 +74,8 @@ class NewsFeedTableViewCell: UITableViewCell {
         layoutSecondLayer()
         layoutThirdLayer()
         textHideLineButton.addTarget(self, action: #selector(textHideLineButtonWasPressed), for: .touchUpInside)
+        centerImageView.isUserInteractionEnabled = true
+        centerImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(imageShoutZoomIn)))
     }
     
     required init?(coder: NSCoder) {
@@ -123,6 +126,10 @@ class NewsFeedTableViewCell: UITableViewCell {
     
     @objc private func textHideLineButtonWasPressed() {
         delegate.fullTextRequest(postId: cellViewModel.postId)
+    }
+    
+    @objc private func imageShoutZoomIn() {
+        delegate.performImageZoomIn(imageView: centerImageView)
     }
     
     private func layoutThirdLayer() {

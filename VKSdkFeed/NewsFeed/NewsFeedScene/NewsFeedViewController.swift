@@ -39,6 +39,21 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
     var isNeededToSearch: Bool = true
     var isNewsFeedViewModelNeededToAppend: Bool = false
     
+    var frameBeforeImageWasZoomed: CGRect!
+    lazy var startImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.isUserInteractionEnabled = true
+        imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(performImageZoomOut)))
+        return imageView
+    }()
+    lazy var backgroundViewForImageZoom: UIView = {
+        let backgroundView = UIView()
+        backgroundView.alpha = 0
+        backgroundView.backgroundColor = .black
+        backgroundView.frame = view.frame
+        return backgroundView
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configurator.configure(view: self)
@@ -151,6 +166,16 @@ class NewsFeedViewController: UIViewController, NewsFeedDisplayLogic {
         interactor?.getNews(request: NewsFeed.ShowNews.Request())
     }
     
+    @objc private func performImageZoomOut() {
+        UIView.animate(withDuration: 0.2, delay: 0, options: .curveEaseOut, animations: {
+            self.backgroundViewForImageZoom.alpha = 0
+            self.startImageView.frame = self.frameBeforeImageWasZoomed
+        }) { (flag) in
+            self.backgroundViewForImageZoom.removeFromSuperview()
+            self.startImageView.removeFromSuperview()
+        }
+    }
+    
 }
 
 // MARK: - NewsTableViewDelegate and NewsTableViewDataSource
@@ -211,6 +236,27 @@ extension NewsFeedViewController: NewsFeedTableViewCellDelegate {
         newsFeedViewModelSearhResult
         interactor?.showFullText(request: NewsFeed.ShowFullPostText.Request(postId: postId,
                                                                             newsFeedViewModel: newsFeedViewModel!))
+    }
+    
+    func performImageZoomIn(imageView: UIImageView) {
+        guard let startFrame = imageView.superview?.convert(imageView.frame, to: nil) else { return }
+        if titleView.navigationControllerTextView.isEditing {
+            titleView.navigationControllerTextView.endEditing(true)
+        }
+        frameBeforeImageWasZoomed = startFrame
+        startImageView.frame = startFrame
+        startImageView.image = imageView.image
+        guard let keyWindow = (UIApplication.shared.windows.filter {$0.isKeyWindow}.first) else { return }
+        keyWindow.addSubview(backgroundViewForImageZoom)
+        keyWindow.addSubview(startImageView)
+        let viewFrame = view.frame
+        
+        UIView.animate(withDuration: 0.3) { [unowned self] in
+            self.backgroundViewForImageZoom.alpha = 1
+            self.startImageView.frame = CGRect(x: 0, y: 0, width: viewFrame.width,
+                                                height: startFrame.height)
+            self.startImageView.center = self.view.center
+        }
     }
 }
 
