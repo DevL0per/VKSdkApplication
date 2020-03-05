@@ -64,7 +64,7 @@ class SizesManager {
                 }
             } else if photoAttachmets.count == 1 {
                 let ratio: CGFloat = CGFloat(photoAttachmets.first!.width) / CGFloat(photoAttachmets.first!.height)
-                let photoFrame = CGSize(width: backgroundViewWidth, height: CGFloat(photoAttachmets.first!.height) / ratio)
+                let photoFrame = CGSize(width: backgroundViewWidth, height: backgroundViewWidth / ratio)
                 attachmentSize = CGRect(origin: CGPoint(x: 0, y: topPosition), size: photoFrame)
             }
             
