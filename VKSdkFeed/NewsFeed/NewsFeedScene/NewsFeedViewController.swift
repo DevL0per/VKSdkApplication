@@ -239,13 +239,14 @@ extension NewsFeedViewController: NewsFeedTableViewCellDelegate {
     }
     
     func performImageZoomIn(imageView: UIImageView) {
+        guard let image = imageView.image else { return }
         guard let startFrame = imageView.superview?.convert(imageView.frame, to: nil) else { return }
         if titleView.navigationControllerTextView.isEditing {
             titleView.navigationControllerTextView.endEditing(true)
         }
         frameBeforeImageWasZoomed = startFrame
         startImageView.frame = startFrame
-        startImageView.image = imageView.image
+        startImageView.image = image
         guard let keyWindow = (UIApplication.shared.windows.filter {$0.isKeyWindow}.first) else { return }
         keyWindow.addSubview(backgroundViewForImageZoom)
         keyWindow.addSubview(startImageView)

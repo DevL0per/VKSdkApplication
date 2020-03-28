@@ -13,7 +13,7 @@ protocol NewsFeedTableViewCellDelegate {
     func performImageZoomIn(imageView: UIImageView)
 }
 
-class NewsFeedTableViewCell: UITableViewCell {
+class NewsFeedTableViewCell: UITableViewCell, animationProtocolDelegate {
     
     var delegate: NewsFeedTableViewCellDelegate!
     
@@ -30,6 +30,7 @@ class NewsFeedTableViewCell: UITableViewCell {
         return button
     }()
     
+    private var gradientForAnimation = CAGradientLayer()
     private var photosCollectionView = PhotosCollectionViewController()
     private var topContectView = UIView()
     private var topViewImage = NewsFeedImageView()
@@ -48,6 +49,7 @@ class NewsFeedTableViewCell: UITableViewCell {
         return textView
     }()
     private var centerImageView = NewsFeedImageView()
+    private var centerViewForAnimation = UIView()
     
     private var bottonContentView = UIView()
     
@@ -66,6 +68,7 @@ class NewsFeedTableViewCell: UITableViewCell {
     override func prepareForReuse() {
         topViewImage.setImage(with: nil)
         centerImageView.setImage(with: nil)
+        stopAnimation()
     }
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -76,6 +79,9 @@ class NewsFeedTableViewCell: UITableViewCell {
         textHideLineButton.addTarget(self, action: #selector(textHideLineButtonWasPressed), for: .touchUpInside)
         centerImageView.isUserInteractionEnabled = true
         centerImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(imageShoutZoomIn)))
+        setupGradientForAnimation()
+        //set delegate to stopAnimation when image will be set
+        centerImageView.delegate = self
     }
     
     required init?(coder: NSCoder) {
@@ -91,6 +97,7 @@ class NewsFeedTableViewCell: UITableViewCell {
         numberOfCommentsLabel.text = post.likesCount
         numberOfRepostLabel.text = post.repostCount
         numberOfViewsLabel.text = post.viewsCount
+        centerViewForAnimation.layer.mask = nil
         
         centerTextLabel.frame = cellViewModel.sizes.postTexFrame
         bottonContentView.frame = cellViewModel.sizes.bottonViewSize
@@ -101,6 +108,7 @@ class NewsFeedTableViewCell: UITableViewCell {
         topViewImage.setImage(with: post.profileImageURL)
         
         centerImageView.isHidden = true
+        centerViewForAnimation.isHidden = true
         photosCollectionView.isHidden = true
         
         if let photos = post.photo, let photo = photos.first {
@@ -111,7 +119,13 @@ class NewsFeedTableViewCell: UITableViewCell {
                 photosCollectionView.backgroundColor = .clear
             } else if photos.count == 1 {
                 centerImageView.isHidden = false
-                centerImageView.frame = cellViewModel.sizes.postPhotoFrame
+                centerViewForAnimation.isHidden = false
+                let frame = cellViewModel.sizes.postPhotoFrame
+                centerImageView.frame = frame
+                centerViewForAnimation.frame = centerImageView.frame
+                gradientForAnimation.frame = centerViewForAnimation.bounds
+                centerViewForAnimation.layer.mask = gradientForAnimation
+                startPhotoAnimation()
                 centerImageView.setImage(with: photo.photoURL)
             }
         }
@@ -130,6 +144,33 @@ class NewsFeedTableViewCell: UITableViewCell {
     
     @objc private func imageShoutZoomIn() {
         delegate.performImageZoomIn(imageView: centerImageView)
+    }
+    
+    func stopAnimation() {
+        gradientForAnimation.removeAnimation(forKey: "centerImageViewAnimation")
+        gradientForAnimation.removeFromSuperlayer()
+        centerViewForAnimation.isHidden = true
+    }
+    
+    private func startPhotoAnimation() {
+        let animation = CABasicAnimation(keyPath: "transform.translation.x")
+        animation.fromValue = -centerImageView.frame.width-50
+        animation.toValue = centerImageView.frame.width+50
+        animation.fillMode = .both
+        animation.duration = 2
+        
+        let group = CAAnimationGroup()
+        group.animations = [animation]
+        group.duration = 2.5
+        group.repeatCount = Float.infinity
+        gradientForAnimation.add(group, forKey: "centerImageViewAnimation")
+    }
+    
+    private func setupGradientForAnimation() {
+        gradientForAnimation.colors = [UIColor.clear.cgColor,
+                                       UIColor.white.cgColor,
+                                       UIColor.clear.cgColor]
+        gradientForAnimation.locations = [0, 0.5, 1]
     }
     
     private func layoutThirdLayer() {
@@ -235,7 +276,9 @@ class NewsFeedTableViewCell: UITableViewCell {
         centerTextLabel.font = UIFont.systemFont(ofSize: 15)
         
         backgroundLayer.addSubview(centerImageView)
+        backgroundLayer.addSubview(centerViewForAnimation)
         centerImageView.backgroundColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
+        centerViewForAnimation.backgroundColor = .white
         
         backgroundLayer.addSubview(bottonContentView)
         backgroundLayer.addSubview(photosCollectionView)

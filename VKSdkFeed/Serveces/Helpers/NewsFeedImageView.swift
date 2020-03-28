@@ -8,10 +8,15 @@
 
 import UIKit
 
+protocol animationProtocolDelegate {
+    func stopAnimation()
+}
+
 class NewsFeedImageView: UIImageView {
     
     var imageURL: String?
-    
+    var delegate: animationProtocolDelegate?
+
     func setImage(with url: String?) {
         imageURL = url
         guard let urlString = url, let url = URL(string: urlString) else {
@@ -20,6 +25,7 @@ class NewsFeedImageView: UIImageView {
         }
         if let imageResponse = URLCache.shared.cachedResponse(for: URLRequest(url: url)) {
             image = UIImage(data: imageResponse.data)
+            delegate?.stopAnimation()
             return
         }
         
@@ -37,6 +43,7 @@ class NewsFeedImageView: UIImageView {
         URLCache.shared.storeCachedResponse(cachedResponse, for: URLRequest(url: url))
         
         if response.url?.absoluteString == imageURL {
+            delegate?.stopAnimation()
             image = UIImage(data: data)
         }
     }
