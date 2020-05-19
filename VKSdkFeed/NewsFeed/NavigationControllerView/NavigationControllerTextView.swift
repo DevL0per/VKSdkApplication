@@ -33,7 +33,7 @@ class NavigationControllerTextView: UITextField  {
         var frame = super.leftViewRect(forBounds: bounds)
         frame.origin.x += 5
         frame.size.width = 18
-        //frame.origin.y += 5
+        frame.origin.y += 5
         frame.size.height = 18
         return frame
     }
